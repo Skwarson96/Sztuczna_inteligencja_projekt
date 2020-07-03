@@ -146,22 +146,26 @@ class LocAgent:
     def getPosterior(self):
         # directions in order 'N', 'E', 'S', 'W'
         P_arr = np.zeros([self.size, self.size, 4], dtype=np.float)
-        print("P_arr ",type(P_arr), np.shape(P_arr))
+        # print("P_arr ",type(P_arr), np.shape(P_arr))
 
         # put probabilities in the array
         # metoda ma zwracac macierz z wartosciami rozkladu o wymiarach: [size, size, 4]
         # 4 wartosci, po jednej dla kazdego kierunku
 
         # TODO PUT YOUR CODE HERE
-        print("self.locations ",type(self.locations), np.shape(self.locations))
-        print("self.P ",type(self.P), np.shape(self.P))
+        # print("self.locations ",type(self.locations), np.shape(self.locations))
+        # print("self.P ",type(self.P), np.shape(self.P))
         self.P = np.transpose(self.P, (1, 2, 0))
-        print("self.P ",type(self.P), np.shape(self.P))
+        # print("self.P ",type(self.P), np.shape(self.P))
 
-        
+
+
         for idx, loc in enumerate(self.locations):
-            print(idx, loc,np.shape(self.P[idx] ))
-            # P_arr[loc[0], loc[1]] = self.P[idx]
+            for index2 in range(4):
+                # print(idx, loc,np.shape(self.P[idx, index2] ))
+                # print(loc[0], loc[1], index2, self.P[idx, index2, index2])
+                P_arr[loc[0], loc[1], index2] = self.P[idx, index2, index2]
+            print(np.max(self.P[idx]))
         print("P_arr ",type(P_arr), np.shape(P_arr))
 
 
@@ -169,16 +173,6 @@ class LocAgent:
         self.P = np.transpose(self.P, (2, 0, 1))
         print("self.P ",type(self.P), np.shape(self.P))
 
-        #
-        # dir_to_idx = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
-        # for idx2 in dir_to_idx.values():
-        #     for idx, loc in enumerate(self.locations):
-        #     # print(np.shape(self.P[idx]))
-        #         print(loc[0], loc[1], idx2)
-        #         P_arr[loc[0], loc[1], idx2 ] = self.P[idx]
-        #         # print(self.P[idx])
-
-        # print(P_arr)
         # -----------------------
         return P_arr
 
