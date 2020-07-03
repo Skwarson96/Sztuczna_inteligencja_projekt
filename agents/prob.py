@@ -38,42 +38,67 @@ class LocAgent:
                 loc_with_orientation.append(new)
                 # print(new)
 
-        print(len(loc_with_orientation))
-        print(loc_with_orientation)
-        print(len(self.locations))
-        print(self.locations)
+        # print(len(loc_with_orientation))
+        # print(loc_with_orientation)
+        # print(len(self.locations))
+        # print(self.locations)
+
         # dictionary from location to its index in the list
         self.loc_to_idx = {loc: idx for idx, loc in enumerate(self.locations)}
+
+
         self.eps_perc = eps_perc
         self.eps_move = eps_move
 
         # previous action
         self.prev_action = None
 
-        # self.dir = dir
+
         self.t = 0
         prob = 1.0 / len(self.locations)
+        # P - macierz z prawdopodobienstwami dla kazdego pola
         self.P = prob * np.ones([len(self.locations)], dtype=np.float)
+        self.P = np.array([[self.P],
+                          [self.P],
+                          [self.P],
+                          [self.P]])
 
+
+        self.P = np.transpose(self.P, (0, 2, 1))
+        # (4, 42, 1)
+
+
+        # print(type(self.P), np.shape(self.P))
+
+        # print(self.P)
     def __call__(self, percept):
         # update posterior
         # TODO PUT YOUR CODE HERE
-        T = np.zeros([len(self.locations), len(self.locations)], dtype=np.float)
+        # T = np.zeros([len(self.locations), len(self.locations)], dtype=np.float)
+        T = np.zeros([len(self.locations), len(self.locations), 4], dtype=np.float)
+        dir_to_idx = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
+        # jezeli poprzednia akcja byl krok PROSTO
         if self.prev_action == 'forward':
-            for index, loc in enumerate(self.locations):
-                #next_loc = nextLoc(loc, self.dir)
-                next_loc = nextLoc(loc, 'E')
-                if legalLoc(next_loc, self.size) and (next_loc not in self.walls):
-                    next_index = self.loc_to_idx[next_loc]
-                    T[index, next_index] = 1.0 - self.eps_move
-                    T[index,index] = self.eps_move
+            for index2, direction in enumerate(dir_to_idx.keys()):
+                # print(index2, direction)
+                for index, loc in enumerate(self.locations):
+                    #next_loc = nextLoc(loc, self.dir)
+                    # {'N': 0, 'E': 1, 'S': 2, 'W': 3}
+                    next_loc = nextLoc(loc, direction)
+                    if legalLoc(next_loc, self.size) and (next_loc not in self.walls):
+                        next_index = self.loc_to_idx[next_loc]
+                        T[index, next_index, index2] = 1.0 - self.eps_move
+                        T[index,index, index2] = self.eps_move
 
-                else:
-                    T[index,index] = 1.0
+                    else:
+                        T[index,index, index2] = 1.0
+        # jezeli poprzednia akcja byl skred w LEWO lub PRAWO
         else:
-
-            for index, loc in enumerate(self.locations):
-                T[index,index] = 1.0
+            for index2 in range(4):
+                for index, loc in enumerate(self.locations):
+                    # macierz jednostkowa
+                    T[index,index, index2] = 1.0
+            # print(np.shape(T))
 
         # print(np.shape(T))
         # print(T)
@@ -93,6 +118,10 @@ class LocAgent:
 
 
         self.t += 1
+
+        print(type(T), np.shape(T.transpose()))
+        print(type(self.P), np.shape(self.P))
+        print(type(O), np.shape(O))
 
         self.P = T.transpose() @ self.P
         self.P = O * self.P
@@ -119,6 +148,7 @@ class LocAgent:
     def getPosterior(self):
         # directions in order 'N', 'E', 'S', 'W'
         P_arr = np.zeros([self.size, self.size, 4], dtype=np.float)
+        #P_arr = np.zeros([self.size, self.size, 1], dtype=np.float)
 
         # put probabilities in the array
         # metoda ma zwracac macierz z wartosciami rozkladu o wymiarach: [size, size, 4]
@@ -126,9 +156,10 @@ class LocAgent:
 
         # TODO PUT YOUR CODE HERE
         dir_to_idx = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
-        for idx2 in dir_to_idx.values():
-            for idx, loc in enumerate(self.locations):
-                P_arr[loc[0], loc[1]] = self.P[idx]
+        # for idx2 in dir_to_idx.values():
+        #     for idx, loc in enumerate(self.locations):
+        #     # print(np.shape(self.P[idx]))
+        #         P_arr[loc[0], loc[1], ] = self.P[idx]
                 # print(self.P[idx])
 
         # print(P_arr)
