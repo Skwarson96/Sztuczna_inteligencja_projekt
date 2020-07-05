@@ -59,11 +59,11 @@ class LocAgent:
         self.t = 0
         prob = 1.0 / len(self.loc_with_orientation)
         # P - macierz z prawdopodobienstwami dla kazdego pola
-        self.P = prob * np.ones([len(self.loc_with_orientation)], dtype=np.float)
-        # self.P = np.array([[self.P],
-        #                   [self.P],
-        #                   [self.P],
-        #                   [self.P]])
+        self.P = prob * np.ones([len(self.locations)], dtype=np.float)
+        self.P = np.array([[self.P],
+                          [self.P],
+                          [self.P],
+                          [self.P]])
 
 
         # self.P = np.transpose(self.P, (0, 2, 1))
@@ -76,57 +76,57 @@ class LocAgent:
         # update posterior
         # TODO PUT YOUR CODE HERE
         # T = np.zeros([len(self.locations), len(self.locations)], dtype=np.float)
-        T = np.zeros([len(self.loc_with_orientation), len(self.loc_with_orientation), 4], dtype=np.float)
+        T = np.zeros([len(self.locations), len(self.locations), 4], dtype=np.float)
+        print("  macierz T   ", type(T), np.shape(T))
         dir_to_idx = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
         # jezeli poprzednia akcja byl krok PROSTO
         if self.prev_action == 'forward':
-            # for index2, direction in enumerate(dir_to_idx.keys()):
-            #     # print(index2, direction)
-            for index, loc in enumerate(self.loc_with_orientation):
-                #next_loc = nextLoc(loc, self.dir)
-                # {'N': 0, 'E': 1, 'S': 2, 'W': 3}
-                # print(((loc[0], loc[1]), loc[2]))
-                if loc[2] == 0:
-                    next_loc = nextLoc((loc[0], loc[1]), 'N')
-                    next_loc = (next_loc[0], next_loc[1], 0)
-                if loc[2] == 1:
-                    next_loc = nextLoc((loc[0], loc[1]), 'E')
-                    next_loc = (next_loc[0], next_loc[1], 1)
-                if loc[2] == 2:
-                    next_loc = nextLoc((loc[0], loc[1]), 'S')
-                    next_loc = (next_loc[0], next_loc[1], 2)
-                if loc[2] == 3:
-                    next_loc = nextLoc((loc[0], loc[1]), 'W')
-                    next_loc = (next_loc[0], next_loc[1], 3)
-                # print("next_loc ", next_loc, type(next_loc))
-                # next_loc = (next_loc[0], next_loc[1], 1)
-                # print(next_loc[0], next_loc[1], 1)
-                # print("next_loc ", next_loc, type(next_loc))
-                if legalLoc((next_loc[0], next_loc[1]), self.size) and ((next_loc[0], next_loc[1]) not in self.walls):
-                    # print("test 1")
-                    next_index = self.loc_with_orientation_to_idx[next_loc]
-                    print("index", index, "next_indeks ", next_index)
-                    T[index, next_index] = 1.0 - self.eps_move
-                    T[index,index] = self.eps_move
-                    print("macierz T ", type(T), np.shape(T))
-                else:
-                    # print("test 2")
-                    T[index,index] = 1.0
-                    # print("macierz T ", type(T), np.shape(T))
+            for index2, direction in enumerate(dir_to_idx.keys()):
+                # print(index2, direction)
+                for index, loc in enumerate(self.locations):
+                    #next_loc = nextLoc(loc, self.dir)
+                    # {'N': 0, 'E': 1, 'S': 2, 'W': 3}
+                    # print(((loc[0], loc[1]), loc[2]))
+
+                    next_loc = nextLoc((loc[0], loc[1]), direction)
+
+                    # next_loc = nextLoc((loc[0], loc[1]), 'E')
+                    #
+                    #
+                    # next_loc = nextLoc((loc[0], loc[1]), 'S')
+                    #
+                    #
+                    # next_loc = nextLoc((loc[0], loc[1]), 'W')
+
+                    # print("next_loc ", next_loc, type(next_loc))
+                    # next_loc = (next_loc[0], next_loc[1], 1)
+                    # print(next_loc[0], next_loc[1], 1)
+                    # print("next_loc ", next_loc, type(next_loc))
+                    if legalLoc((next_loc[0], next_loc[1]), self.size) and ((next_loc[0], next_loc[1]) not in self.walls):
+                        # print("test 1")
+                        next_index = self.loc_to_idx[next_loc]
+                        print("index", index, "next_indeks ", next_index)
+                        T[index, next_index, index2] = 1.0 - self.eps_move
+                        T[index,index, index2] = self.eps_move
+                        print("macierz T ", type(T), np.shape(T))
+                    else:
+                        # print("test 2")
+                        T[index,index, index2] = 1.0
+                        # print("macierz T ", type(T), np.shape(T))
 
 
         # jezeli poprzednia akcja byl skred w LEWO lub PRAWO
         else:
-            # for index2 in range(4):
-            for index, loc in enumerate(self.loc_with_orientation):
-                # macierz jednostkowa
-                T[index,index] = 1.0
+            for index2 in range(4):
+                for index, loc in enumerate(self.locations):
+                    # macierz jednostkowa
+                    T[index,index, index2] = 1.0
             # print(np.shape(T))
 
         # print(np.shape(T))
         # print(T)
-        O = np.zeros([len(self.loc_with_orientation)], dtype=np.float)
-        for index, loc in enumerate(self.loc_with_orientation):
+        O = np.zeros([len(self.locations)], dtype=np.float)
+        for index, loc in enumerate(self.locations):
             # print(loc)
             prob = 1.0
             for d in ['N', 'E', 'S', 'W']:
@@ -143,10 +143,15 @@ class LocAgent:
         self.t += 1
 
         print("macierz T ", type(T), np.shape(T))
+        print("macierz T.transpose() ", type(T), np.shape(T.transpose()))
         print("macierz O ", type(O), np.shape(O))
-        print("self.P",type(self.P), np.shape(self.P))
+        print("self.P", type(self.P), np.shape(self.P))
+        # print(self.P)
+        # print(T)
+        # print(O)
         # print(type(O), np.shape(O))
-        # self.P = np.transpose(self.P, (1, 2, 0))
+        self.P = np.transpose(self.P, (0, 2, 1))
+        # self.P = T.transpose() @ self.P
         self.P = T.transpose() @ self.P
         # self.P = np.transpose(T, (1, 2, 0)) @ self.P
         self.P = O * self.P
@@ -184,14 +189,14 @@ class LocAgent:
         # self.P = np.transpose(self.P, (1, 2, 0))
         print("self.P ",type(self.P), np.shape(self.P))
         # print(self.P)
-
-        for idx, loc in enumerate(self.loc_with_orientation):
-            # print(idx, loc, self.P[loc[2], idx])
-            # for index2 in range(4):
-            #     # print(idx, loc,np.shape(self.P[idx, index2] ))
-            #     # print(loc[0], loc[1], index2, self.P[idx, index2, index2])
-            #     # P_arr[loc[0], loc[1], index2] = 0.1
-            P_arr[loc[0], loc[1], loc[2]] = self.P[loc[2],idx]
+        #
+        # for idx, loc in enumerate(self.locations):
+        #     # print(idx, loc, self.P[loc[2], idx])
+        #     # for index2 in range(4):
+        #     #     # print(idx, loc,np.shape(self.P[idx, index2] ))
+        #     #     # print(loc[0], loc[1], index2, self.P[idx, index2, index2])
+        #     #     # P_arr[loc[0], loc[1], index2] = 0.1
+        #     P_arr[loc[0], loc[1], loc[2]] = self.P[loc[2],idx]
                 #          prob = 1.0 / len(self.locations)
                 # print("test")
                 # print(P_arr[loc[0], loc[1], index2])
