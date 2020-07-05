@@ -103,22 +103,24 @@ class LocAgent:
                 # print(next_loc[0], next_loc[1], 1)
                 # print("next_loc ", next_loc, type(next_loc))
                 if legalLoc((next_loc[0], next_loc[1]), self.size) and ((next_loc[0], next_loc[1]) not in self.walls):
-                    print("test 1")
+                    # print("test 1")
                     next_index = self.loc_with_orientation_to_idx[next_loc]
-                    print("next_indeks ", next_index)
-
-                    T[index, next_index, loc[2]] = 1.0 - self.eps_move
-                    T[index,index, loc[2]] = self.eps_move
-
+                    print("index", index, "next_indeks ", next_index)
+                    T[index, next_index] = 1.0 - self.eps_move
+                    T[index,index] = self.eps_move
+                    print("macierz T ", type(T), np.shape(T))
                 else:
-                    print("test 2")
-                    T[index,index, loc[2]] = 1.0
+                    # print("test 2")
+                    T[index,index] = 1.0
+                    # print("macierz T ", type(T), np.shape(T))
+
+
         # jezeli poprzednia akcja byl skred w LEWO lub PRAWO
         else:
-            for index2 in range(4):
-                for index, loc in enumerate(self.loc_with_orientation):
-                    # macierz jednostkowa
-                    T[index,index, index2] = 1.0
+            # for index2 in range(4):
+            for index, loc in enumerate(self.loc_with_orientation):
+                # macierz jednostkowa
+                T[index,index] = 1.0
             # print(np.shape(T))
 
         # print(np.shape(T))
