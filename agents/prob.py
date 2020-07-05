@@ -77,7 +77,7 @@ class LocAgent:
         # TODO PUT YOUR CODE HERE
         # T = np.zeros([len(self.locations), len(self.locations)], dtype=np.float)
         T = np.zeros([len(self.locations), len(self.locations), 4], dtype=np.float)
-        print("  macierz T   ", type(T), np.shape(T))
+        # print("  macierz T   ", type(T), np.shape(T))
         dir_to_idx = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
         # jezeli poprzednia akcja byl krok PROSTO
         if self.prev_action == 'forward':
@@ -105,10 +105,10 @@ class LocAgent:
                     if legalLoc((next_loc[0], next_loc[1]), self.size) and ((next_loc[0], next_loc[1]) not in self.walls):
                         # print("test 1")
                         next_index = self.loc_to_idx[next_loc]
-                        print("index", index, "next_indeks ", next_index)
+                        # print("index", index, "next_indeks ", next_index)
                         T[index, next_index, index2] = 1.0 - self.eps_move
                         T[index,index, index2] = self.eps_move
-                        print("macierz T ", type(T), np.shape(T))
+                        # print("macierz T ", type(T), np.shape(T))
                     else:
                         # print("test 2")
                         T[index,index, index2] = 1.0
@@ -142,10 +142,10 @@ class LocAgent:
 
         self.t += 1
 
-        print("macierz T ", type(T), np.shape(T))
-        print("macierz T.transpose() ", type(T), np.shape(T.transpose()))
-        print("macierz O ", type(O), np.shape(O))
-        print("self.P", type(self.P), np.shape(self.P))
+        # print("macierz T ", type(T), np.shape(T))
+        # print("macierz T.transpose() ", type(T), np.shape(T.transpose()))
+        # print("macierz O ", type(O), np.shape(O))
+        # print("self.P", type(self.P), np.shape(self.P))
         # print(self.P)
         # print(T)
         # print(O)
@@ -187,7 +187,7 @@ class LocAgent:
         # print("self.locations ",type(self.locations), np.shape(self.locations))
         # print("self.P ",type(self.P), np.shape(self.P))
         # self.P = np.transpose(self.P, (1, 2, 0))
-        print("self.P ",type(self.P), np.shape(self.P))
+        # print("self.P ",type(self.P), np.shape(self.P))
         # print(self.P)
         #
         # for idx, loc in enumerate(self.locations):
@@ -202,6 +202,15 @@ class LocAgent:
                 # print(P_arr[loc[0], loc[1], index2])
         # print(P_arr)
         # print(np.max(P_arr))
+        for index2 in range(4):
+            for idx, loc in enumerate(self.locations):
+                # print(type(self.locations), np.shape(self.locations))
+                # print(type(self.P[idx]), np.shape(self.P[idx, index2]))
+                # print(self.P[idx, index2])
+                # print(idx, loc)
+                print("self.P ", type(self.P), np.shape(self.P))
+                P_arr[loc[0], loc[1], 0] = self.P[index2, idx, idx]
+
         print("P_arr ",type(P_arr), np.shape(P_arr))
 
 
