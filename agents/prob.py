@@ -57,14 +57,17 @@ class LocAgent:
         self.prev_action = None
 
         self.t = 0
-        prob = 1.0 / len(self.loc_with_orientation)
+        # prob = 1.0 / len(self.loc_with_orientation)
+        prob = 1.0 / len(self.locations)
         # P - macierz z prawdopodobienstwami dla kazdego pola
         self.P = prob * np.ones([len(self.locations)], dtype=np.float)
+        # print(self.P, np.shape(self.P))
         self.P = np.array([[self.P],
                           [self.P],
                           [self.P],
                           [self.P]])
 
+        print(np.shape(self.P))
 
         # self.P = np.transpose(self.P, (0, 2, 1))
         # (4, 42, 1)
@@ -107,7 +110,9 @@ class LocAgent:
                         next_index = self.loc_to_idx[next_loc]
                         # print("index", index, "next_indeks ", next_index)
                         T[index, next_index, index2] = 1.0 - self.eps_move
+                        # print(T[index, next_index, index2])
                         T[index,index, index2] = self.eps_move
+                        # print(T[index,index, index2])
                         # print("macierz T ", type(T), np.shape(T))
                     else:
                         # print("test 2")
@@ -115,7 +120,7 @@ class LocAgent:
                         # print("macierz T ", type(T), np.shape(T))
 
 
-        # jezeli poprzednia akcja byl skred w LEWO lub PRAWO
+        # jezeli poprzednia akcja byl skret w LEWO lub PRAWO
         else:
             for index2 in range(4):
                 for index, loc in enumerate(self.locations):
@@ -124,7 +129,8 @@ class LocAgent:
             # print(np.shape(T))
 
         # print(np.shape(T))
-        # print(T)
+        # for i in T:
+        #     print(np.max(i))
         O = np.zeros([len(self.locations)], dtype=np.float)
         for index, loc in enumerate(self.locations):
             # print(loc)
@@ -156,6 +162,7 @@ class LocAgent:
         # self.P = np.transpose(T, (1, 2, 0)) @ self.P
         self.P = O * self.P
         self.P /= np.sum(self.P)
+        # print(np.max(self.P))
         # print(type(self.P), np.shape(self.P))
         # print(self.P)
         # -----------------------
@@ -208,10 +215,11 @@ class LocAgent:
                 # print(type(self.P[idx]), np.shape(self.P[idx, index2]))
                 # print(self.P[idx, index2])
                 # print(idx, loc)
-                print("self.P ", type(self.P), np.shape(self.P))
-                P_arr[loc[0], loc[1], 0] = self.P[index2, idx, idx]
-
-        print("P_arr ",type(P_arr), np.shape(P_arr))
+                # print("self.P ", type(self.P), np.shape(self.P))
+                # print(self.P[index2, idx, idx])
+                P_arr[loc[0], loc[1], index2] = self.P[index2, idx, idx]
+                # P_arr[loc[0], loc[1], index2] = 1.0
+        # print("P_arr ",type(P_arr), np.shape(P_arr))
 
 
 
