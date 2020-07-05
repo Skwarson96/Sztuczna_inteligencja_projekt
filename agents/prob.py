@@ -45,7 +45,7 @@ class LocAgent:
         # print(self.locations)
 
         # dictionary from location to its index in the list
-        # self.loc_to_idx = {loc: idx for idx, loc in enumerate(self.locations)}
+        self.loc_to_idx = {loc: idx for idx, loc in enumerate(self.locations)}
         self.loc_with_orientation_to_idx = {loc: idx for idx, loc in enumerate(self.loc_with_orientation)}
         # print(self.loc_to_idx)
         # print(self.loc_with_orientation_to_idx)
@@ -88,17 +88,25 @@ class LocAgent:
                 # print(((loc[0], loc[1]), loc[2]))
                 if loc[2] == 0:
                     next_loc = nextLoc((loc[0], loc[1]), 'N')
+                    next_loc = (next_loc[0], next_loc[1], 0)
                 if loc[2] == 1:
                     next_loc = nextLoc((loc[0], loc[1]), 'E')
+                    next_loc = (next_loc[0], next_loc[1], 1)
                 if loc[2] == 2:
                     next_loc = nextLoc((loc[0], loc[1]), 'S')
+                    next_loc = (next_loc[0], next_loc[1], 2)
                 if loc[2] == 3:
                     next_loc = nextLoc((loc[0], loc[1]), 'W')
-                # print("next_loc ", next_loc)
-                
-                if legalLoc(next_loc, self.size) and (next_loc not in self.walls):
+                    next_loc = (next_loc[0], next_loc[1], 3)
+                # print("next_loc ", next_loc, type(next_loc))
+                # next_loc = (next_loc[0], next_loc[1], 1)
+                # print(next_loc[0], next_loc[1], 1)
+                # print("next_loc ", next_loc, type(next_loc))
+                if legalLoc((next_loc[0], next_loc[1]), self.size) and ((next_loc[0], next_loc[1]) not in self.walls):
                     print("test 1")
                     next_index = self.loc_with_orientation_to_idx[next_loc]
+                    print("next_indeks ", next_index)
+
                     T[index, next_index, loc[2]] = 1.0 - self.eps_move
                     T[index,index, loc[2]] = self.eps_move
 
