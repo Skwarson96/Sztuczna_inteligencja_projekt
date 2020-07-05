@@ -80,22 +80,31 @@ class LocAgent:
         dir_to_idx = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
         # jezeli poprzednia akcja byl krok PROSTO
         if self.prev_action == 'forward':
-            
-            for index2, direction in enumerate(dir_to_idx.keys()):
-                # print(index2, direction)
-                for index, loc in enumerate(self.loc_with_orientation):
-                    #next_loc = nextLoc(loc, self.dir)
-                    # {'N': 0, 'E': 1, 'S': 2, 'W': 3}
-                    # print(loc)
-                    next_loc = nextLoc((loc[0], loc[1]), direction)
-                    # print("next_loc ", next_loc)
-                    if legalLoc(next_loc, self.size) and (next_loc not in self.walls):
-                        next_index = self.loc_with_orientation_to_idx[next_loc]
-                        T[index, next_index, index2] = 1.0 - self.eps_move
-                        T[index,index, index2] = self.eps_move
+            # for index2, direction in enumerate(dir_to_idx.keys()):
+            #     # print(index2, direction)
+            for index, loc in enumerate(self.loc_with_orientation):
+                #next_loc = nextLoc(loc, self.dir)
+                # {'N': 0, 'E': 1, 'S': 2, 'W': 3}
+                # print(((loc[0], loc[1]), loc[2]))
+                if loc[2] == 0:
+                    next_loc = nextLoc((loc[0], loc[1]), 'N')
+                if loc[2] == 1:
+                    next_loc = nextLoc((loc[0], loc[1]), 'E')
+                if loc[2] == 2:
+                    next_loc = nextLoc((loc[0], loc[1]), 'S')
+                if loc[2] == 3:
+                    next_loc = nextLoc((loc[0], loc[1]), 'W')
+                # print("next_loc ", next_loc)
+                
+                if legalLoc(next_loc, self.size) and (next_loc not in self.walls):
+                    print("test 1")
+                    next_index = self.loc_with_orientation_to_idx[next_loc]
+                    T[index, next_index, loc[2]] = 1.0 - self.eps_move
+                    T[index,index, loc[2]] = self.eps_move
 
-                    else:
-                        T[index,index, index2] = 1.0
+                else:
+                    print("test 2")
+                    T[index,index, loc[2]] = 1.0
         # jezeli poprzednia akcja byl skred w LEWO lub PRAWO
         else:
             for index2 in range(4):
