@@ -3,7 +3,8 @@
 
 import random
 import numpy as np
-
+import sys
+np.set_printoptions(threshold=sys.maxsize)
 from gridutil import *
 
 best_turn = {('N', 'E'): 'turnright',
@@ -126,11 +127,12 @@ class LocAgent:
                 for index, loc in enumerate(self.locations):
                     # macierz jednostkowa
                     T[index,index, index2] = 1.0
-            # print(np.shape(T))
-
+            #
+            #
         # print(np.shape(T))
-        # for i in T:
-        #     print(np.max(i))
+        T = np.transpose(T, (2, 0, 1))
+        print(np.shape(T))
+        # print(T)
         O = np.zeros([len(self.locations)], dtype=np.float)
         for index, loc in enumerate(self.locations):
             # print(loc)
@@ -145,20 +147,24 @@ class LocAgent:
                 else:
                     prob *= self.eps_perc
             O[index] = prob
-
+        # print(np.shape(O))
+        # T = np.transpose(T, (2, 0, 1))
+        # print(np.shape(T))
+        # print(O)
         self.t += 1
 
         # print("macierz T ", type(T), np.shape(T))
         # print("macierz T.transpose() ", type(T), np.shape(T.transpose()))
         # print("macierz O ", type(O), np.shape(O))
-        # print("self.P", type(self.P), np.shape(self.P))
+        print("self.P", type(self.P), np.shape(self.P))
         # print(self.P)
-        # print(T)
-        # print(O)
+        print(T)
+        print(O)
         # print(type(O), np.shape(O))
-        self.P = np.transpose(self.P, (0, 2, 1))
+        self.P = np.transpose(self.P, (0,2 , 1))
+        print("self.P", type(self.P), np.shape(self.P))
         # self.P = T.transpose() @ self.P
-        self.P = T.transpose() @ self.P
+        self.P = T @ self.P
         # self.P = np.transpose(T, (1, 2, 0)) @ self.P
         self.P = O * self.P
         self.P /= np.sum(self.P)
@@ -167,9 +173,13 @@ class LocAgent:
         # print(self.P)
         # -----------------------
 
+
+
         action = 'forward'
         # TODO CHANGE THIS HEURISTICS TO SPEED UP CONVERGENCE
+
         # if there is a wall ahead then lets turn
+        #         rel_dirs = {'fwd': 0, 'right': 1, 'bckwd': 2, 'left': 3}
         if 'fwd' in percept:
             # higher chance of turning left to avoid getting stuck in one location
             action = np.random.choice(['turnleft', 'turnright'], 1, p=[0.8, 0.2])
@@ -177,14 +187,57 @@ class LocAgent:
             # prefer moving forward to explore
             action = np.random.choice(['forward', 'turnleft', 'turnright'], 1, p=[0.8, 0.1, 0.1])
 
+        ilosc = len(percept)
+        # for per in percept:
+        #     if per == 'left':
+        #         action = 'forward'
+        #     if per == 'right':
+        #         pass
+        #     if per == 'fwd':
+        #         pass
+        #     if per == 'bckwd':
+        #         action = 'turnleft'
+        #     if per == 'bump':
+        #         action = 'turnleft'
+        # if 'fwd' in percept:
+        #     action = 'turnright'
+        # if 'right' in percept and not 'fwd' in percept:
+        #     action = 'forward'
+        #
+        # if 'bump' in percept:
+        #     action = np.random.choice(['turnleft', 'turnright'], 1, p=[0.5, 0.5])
+
+
+        # if self.plan_next_move:
+        #     # randomly choose from not obstacles
+        #     dirs = [d for d in ['N', 'E', 'S', 'W'] if d not in percept]
+        #     self.next_dir = random.choice(dirs)
+        #     self.plan_next_move = False
+        #
+        # action = 'forward'
+        # if self.dir != self.next_dir:
+        #     action = best_turn[(self.dir, self.next_dir)]
+        # else:
+        #     self.plan_next_move = True
+        #
+        # if action == 'turnleft':
+        #     self.dir = leftTurn(self.dir)
+        # elif action == 'turnright':
+        #     self.dir = rightTurn(self.dir)
+
+
         self.prev_action = action
 
         return action
 
+
+
+
+
     def getPosterior(self):
         # directions in order 'N', 'E', 'S', 'W'
         P_arr = np.zeros([self.size, self.size, 4], dtype=np.float)
-        print("P_arr ",type(P_arr), np.shape(P_arr))
+        # print("P_arr ",type(P_arr), np.shape(P_arr))
 
         # put probabilities in the array
         # metoda ma zwracac macierz z wartosciami rozkladu o wymiarach: [size, size, 4]
