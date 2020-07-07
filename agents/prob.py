@@ -219,12 +219,12 @@ class LocAgent:
             # O[index] = prob
 
 
-        # print(np.shape(O))
+        print("np.shape(O)",np.shape(O))
         O = np.transpose(O, (2, 0, 1))
-        # print(np.shape(O))
+        print("np.shape(O)",np.shape(O))
         # print(np.shape(T))
-        # print(O)
-        self.t += 1
+        print(O)
+        # self.t += 1
 
         # print("macierz T ", type(T), np.shape(T))
         # print("macierz T.transpose() ", type(T), np.shape(T.transpose()))
@@ -248,7 +248,7 @@ class LocAgent:
         print("self.P 2 ", type(self.P), np.shape(self.P))
         # self.P = np.transpose(T, (1, 2, 0)) @ self.P
         self.P = O * self.P
-        print(self.P)
+        # print(self.P)
         # print(O)
         # self.P /= np.sum(self.P)
         print("self.P 3 ", type(self.P), np.shape(self.P))
@@ -356,6 +356,8 @@ class LocAgent:
                 # print("self.P ", type(self.P), np.shape(self.P))
                 # print(self.P[index2, idx, idx])
                 P_arr[loc[0], loc[1], index2] = self.P[index2, idx, 0]
+                # if index2 == 1:
+                #     P_arr[loc[0], loc[1], index2] = 1
                 # P_arr[loc[0], loc[1], index2] = 1.0
         print("P_arr ",type(P_arr), np.shape(P_arr))
         # print(P_arr)
