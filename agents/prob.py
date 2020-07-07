@@ -128,55 +128,6 @@ class LocAgent:
                     T[index, index, index2] = 1.0
 
 
-        #     for index2, direction in enumerate(dir_to_idx.keys()):
-        #         # print(index2, direction)
-        #         for index, loc in enumerate(self.locations):
-        #             #next_loc = nextLoc(loc, self.dir)
-        #             # {'N': 0, 'E': 1, 'S': 2, 'W': 3}
-        #             # print(((loc[0], loc[1]), loc[2]))
-        #
-        #             next_loc = nextLoc((loc[0], loc[1]), direction)
-        #
-        #             # next_loc = nextLoc((loc[0], loc[1]), 'E')
-        #             #
-        #             #
-        #             # next_loc = nextLoc((loc[0], loc[1]), 'S')
-        #             #
-        #             #
-        #             # next_loc = nextLoc((loc[0], loc[1]), 'W')
-        #
-        #             # print("next_loc ", next_loc, type(next_loc))
-        #             # next_loc = (next_loc[0], next_loc[1], 1)
-        #             # print(next_loc[0], next_loc[1], 1)
-        #             # print("next_loc ", next_loc, type(next_loc))
-        #             if legalLoc((next_loc[0], next_loc[1]), self.size) and ((next_loc[0], next_loc[1]) not in self.walls):
-        #                 # print("test 1")
-        #                 next_index = self.loc_to_idx[next_loc]
-        #                 # print("index", index, "next_indeks ", next_index)
-        #                 T[index, next_index, index2] = 1.0 - self.eps_move
-        #                 # print(T[index, next_index, index2])
-        #                 T[index,index, index2] = self.eps_move
-        #                 # print(T[index,index, index2])
-        #                 # print("macierz T ", type(T), np.shape(T))
-        #             else:
-        #                 # print("test 2")
-        #                 T[index,index, index2] = 1.0
-        #                 # print("macierz T ", type(T), np.shape(T))
-        #
-        #
-        # # jezeli poprzednia akcja byl skret w LEWO lub PRAWO
-        # else:
-        #     for index2 in range(4):
-        #         for index, loc in enumerate(self.locations):
-        #             # macierz jednostkowa
-        #             T[index,index, index2] = 1.0 - self.eps_move
-            #
-            #
-
-        # print(np.shape(T))
-        # print(T)
-
-
         T = np.transpose(T, (2, 0, 1))
         print(np.shape(T))
         # print(T)
@@ -429,98 +380,6 @@ class LocAgent:
                         O[index, 3, i] = prob
 
 
-            # for idx , d in enumerate(['N', 'E', 'S', 'W']):
-            #     nh_loc = nextLoc((loc[0], loc[1]), d)
-            #     obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-            #     # if obstale ==
-            #
-            #     for per in percept:
-            #         if obstale == (per in percept2):
-            #             # print("test : ", (d in percept))
-            #             # print("testt1",per, "d: ", d, index)
-            #             prob *= (1 - self.eps_perc)
-            #         else:
-            #             # print('test 2')
-            #             prob *= self.eps_perc
-            #         prob = round(prob, 4)
-            #     O[index, 0, idx] = prob
-
-            # for per2 in percept:
-            #     if per2 == 'fwd':
-            #         for d in ['N', 'E', 'S', 'W']:
-            #             nh_loc = nextLoc((loc[0], loc[1]), d)
-            #             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-            #             if obstale == (d in percept):
-            #                 # print("test : ", (d in percept))
-            #                 # print("testt1", "d: ", d, index)
-            #                 prob *= (1 - self.eps_perc)
-            #             else:
-            #                 # print('test 2')
-            #                 prob *= self.eps_perc
-            #             prob = round(prob, 4)
-            #         O[index, 0, 0] = prob
-            #
-            #     if per2 == 'right':
-            #         for d in ['N', 'E', 'S', 'W']:
-            #             nh_loc = nextLoc((loc[0], loc[1]), d)
-            #             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-            #             if obstale == (d in percept):
-            #                 # print("test : ", (d in percept))
-            #                 # print("testt1", "d: ", d, index)
-            #                 prob *= (1 - self.eps_perc)
-            #             else:
-            #                 # print('test 2')
-            #                 prob *= self.eps_perc
-            #             prob = round(prob, 4)
-            #         O[index, 0, 1] = prob
-            #     if per2 == 'left':
-            #         for d in ['N', 'E', 'S', 'W']:
-            #             nh_loc = nextLoc((loc[0], loc[1]), d)
-            #             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-            #             if obstale == (d in percept):
-            #                 # print("test : ", (d in percept))
-            #                 # print("testt1", "d: ", d, index)
-            #                 prob *= (1 - self.eps_perc)
-            #             else:
-            #                 # print('test 2')
-            #                 prob *= self.eps_perc
-            #             prob = round(prob, 4)
-            #         O[index, 0, 2] = prob
-            #     if per2 == 'bckwd':
-            #         for d in ['N', 'E', 'S', 'W']:
-            #             nh_loc = nextLoc((loc[0], loc[1]), d)
-            #             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-            #             if obstale == (d in percept):
-            #                 # print("test : ", (d in percept))
-            #                 # print("testt1", "d: ", d, index)
-            #                 prob *= (1 - self.eps_perc)
-            #             else:
-            #                 # print('test 2')
-            #                 prob *= self.eps_perc
-            #             prob = round(prob, 4)
-            #         O[index, 0, 3] = prob
-            #     if per2 == 'bump':
-            #         pass
-
-            # for d in ['N', 'E', 'S', 'W']:
-            #     #
-            #     # for per in ['fwd', 'right', 'left', 'bckwd']:
-            #     #     pass
-            #     nh_loc = nextLoc((loc[0], loc[1]), d)
-            #     obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-            #     # print(obstale)
-            #
-            #     if obstale == (d in percept):
-            #         # print("test : ", (d in percept))
-            #         # print("testt1", "d: ", d, index)
-            #         prob *= (1 - self.eps_perc)
-            #     else:
-            #         # print('test 2')
-            #         prob *= self.eps_perc
-            #     prob = round(prob, 4)
-            #     # print(prob)
-            # O[index] = prob
-
 
         print("np.shape(O)",np.shape(O))
         # print(O)
@@ -579,42 +438,7 @@ class LocAgent:
             action = np.random.choice(['forward', 'turnleft', 'turnright'], 1, p=[0.8, 0.1, 0.1])
 
         ilosc = len(percept)
-        # for per in percept:
-        #     if per == 'left':
-        #         action = 'forward'
-        #     if per == 'right':
-        #         pass
-        #     if per == 'fwd':
-        #         pass
-        #     if per == 'bckwd':
-        #         action = 'turnleft'
-        #     if per == 'bump':
-        #         action = 'turnleft'
-        # if 'fwd' in percept:
-        #     action = 'turnright'
-        # if 'right' in percept and not 'fwd' in percept:
-        #     action = 'forward'
-        #
-        # if 'bump' in percept:
-        #     action = np.random.choice(['turnleft', 'turnright'], 1, p=[0.5, 0.5])
 
-
-        # if self.plan_next_move:
-        #     # randomly choose from not obstacles
-        #     dirs = [d for d in ['N', 'E', 'S', 'W'] if d not in percept]
-        #     self.next_dir = random.choice(dirs)
-        #     self.plan_next_move = False
-        #
-        # action = 'forward'
-        # if self.dir != self.next_dir:
-        #     action = best_turn[(self.dir, self.next_dir)]
-        # else:
-        #     self.plan_next_move = True
-        #
-        # if action == 'turnleft':
-        #     self.dir = leftTurn(self.dir)
-        # elif action == 'turnright':
-        #     self.dir = rightTurn(self.dir)
 
 
         self.prev_action = action
