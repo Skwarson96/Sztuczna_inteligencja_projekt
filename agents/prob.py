@@ -69,7 +69,7 @@ class LocAgent:
                           [self.P]])
 
         print(np.shape(self.P))
-
+        self.P = np.transpose(self.P, (0, 2, 1))
         # self.P = np.transpose(self.P, (0, 2, 1))
         # (4, 42, 1)
         print("START", type(self.P), np.shape(self.P))
@@ -131,24 +131,97 @@ class LocAgent:
             #
         # print(np.shape(T))
         T = np.transpose(T, (2, 0, 1))
-        print(np.shape(T))
+        # print(np.shape(T))
         # print(T)
-        O = np.zeros([len(self.locations)], dtype=np.float)
+        # print("percept ", percept)
+        # ['fwd', 'right', 'left', 'bckwd']
+
+
+        O = np.zeros([len(self.locations),1, 4], dtype=np.float)
+
         for index, loc in enumerate(self.locations):
             # print(loc)
             prob = 1.0
-            for d in ['N', 'E', 'S', 'W']:
-                nh_loc = nextLoc((loc[0], loc[1]), d)
+            for per2 in percept:
+                if per2 == 'fwd':
+                    for d in ['N', 'E', 'S', 'W']:
+                        nh_loc = nextLoc((loc[0], loc[1]), d)
+                        obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                        if obstale == (d in percept):
+                            # print("test : ", (d in percept))
+                            # print("testt1", "d: ", d, index)
+                            prob *= (1 - self.eps_perc)
+                        else:
+                            # print('test 2')
+                            prob *= self.eps_perc
+                        prob = round(prob, 4)
+                    O[index, 0, 0] = prob
 
-                obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                if per2 == 'right':
+                    for d in ['N', 'E', 'S', 'W']:
+                        nh_loc = nextLoc((loc[0], loc[1]), d)
+                        obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                        if obstale == (d in percept):
+                            # print("test : ", (d in percept))
+                            # print("testt1", "d: ", d, index)
+                            prob *= (1 - self.eps_perc)
+                        else:
+                            # print('test 2')
+                            prob *= self.eps_perc
+                        prob = round(prob, 4)
+                    O[index, 0, 1] = prob
+                if per2 == 'left':
+                    for d in ['N', 'E', 'S', 'W']:
+                        nh_loc = nextLoc((loc[0], loc[1]), d)
+                        obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                        if obstale == (d in percept):
+                            # print("test : ", (d in percept))
+                            # print("testt1", "d: ", d, index)
+                            prob *= (1 - self.eps_perc)
+                        else:
+                            # print('test 2')
+                            prob *= self.eps_perc
+                        prob = round(prob, 4)
+                    O[index, 0, 2] = prob
+                if per2 == 'bckwd':
+                    for d in ['N', 'E', 'S', 'W']:
+                        nh_loc = nextLoc((loc[0], loc[1]), d)
+                        obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                        if obstale == (d in percept):
+                            # print("test : ", (d in percept))
+                            # print("testt1", "d: ", d, index)
+                            prob *= (1 - self.eps_perc)
+                        else:
+                            # print('test 2')
+                            prob *= self.eps_perc
+                        prob = round(prob, 4)
+                    O[index, 0, 3] = prob
+                if per2 == 'bump':
+                    pass
 
-                if obstale == (d in percept):
-                    prob *= (1 - self.eps_perc)
-                else:
-                    prob *= self.eps_perc
-            O[index] = prob
+            # for d in ['N', 'E', 'S', 'W']:
+            #     #
+            #     # for per in ['fwd', 'right', 'left', 'bckwd']:
+            #     #     pass
+            #     nh_loc = nextLoc((loc[0], loc[1]), d)
+            #     obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+            #     # print(obstale)
+            #
+            #     if obstale == (d in percept):
+            #         # print("test : ", (d in percept))
+            #         # print("testt1", "d: ", d, index)
+            #         prob *= (1 - self.eps_perc)
+            #     else:
+            #         # print('test 2')
+            #         prob *= self.eps_perc
+            #     prob = round(prob, 4)
+            #     # print(prob)
+            # O[index] = prob
+
+
         # print(np.shape(O))
-        # T = np.transpose(T, (2, 0, 1))
+        O = np.transpose(O, (2, 0, 1))
+        # print(np.shape(O))
         # print(np.shape(T))
         # print(O)
         self.t += 1
@@ -156,18 +229,29 @@ class LocAgent:
         # print("macierz T ", type(T), np.shape(T))
         # print("macierz T.transpose() ", type(T), np.shape(T.transpose()))
         # print("macierz O ", type(O), np.shape(O))
-        print("self.P", type(self.P), np.shape(self.P))
+        # print("self.P", type(self.P), np.shape(self.P))
+        # print(T)
+        # print(O)
         # print(self.P)
-        print(T)
-        print(O)
+
         # print(type(O), np.shape(O))
-        self.P = np.transpose(self.P, (0,2 , 1))
+
+        # self.P = np.transpose(self.P, (0, 2, 1))
+
         print("self.P", type(self.P), np.shape(self.P))
+        print("T", type(T), np.shape(T))
+        print("O", type(O), np.shape(O))
         # self.P = T.transpose() @ self.P
+
         self.P = T @ self.P
+
+        print("self.P 2 ", type(self.P), np.shape(self.P))
         # self.P = np.transpose(T, (1, 2, 0)) @ self.P
         self.P = O * self.P
-        self.P /= np.sum(self.P)
+        print(self.P)
+        # print(O)
+        # self.P /= np.sum(self.P)
+        print("self.P 3 ", type(self.P), np.shape(self.P))
         # print(np.max(self.P))
         # print(type(self.P), np.shape(self.P))
         # print(self.P)
@@ -237,8 +321,9 @@ class LocAgent:
     def getPosterior(self):
         # directions in order 'N', 'E', 'S', 'W'
         P_arr = np.zeros([self.size, self.size, 4], dtype=np.float)
-        # print("P_arr ",type(P_arr), np.shape(P_arr))
-
+        print("P_arr ",type(P_arr), np.shape(P_arr))
+        print("self.P 4 ", type(self.P), np.shape(self.P))
+        # print(self.P)
         # put probabilities in the array
         # metoda ma zwracac macierz z wartosciami rozkladu o wymiarach: [size, size, 4]
         # 4 wartosci, po jednej dla kazdego kierunku
@@ -270,10 +355,10 @@ class LocAgent:
                 # print(idx, loc)
                 # print("self.P ", type(self.P), np.shape(self.P))
                 # print(self.P[index2, idx, idx])
-                P_arr[loc[0], loc[1], index2] = self.P[index2, idx, idx]
+                P_arr[loc[0], loc[1], index2] = self.P[index2, idx, 0]
                 # P_arr[loc[0], loc[1], index2] = 1.0
-        # print("P_arr ",type(P_arr), np.shape(P_arr))
-
+        print("P_arr ",type(P_arr), np.shape(P_arr))
+        # print(P_arr)
 
 
         # self.P = np.transpose(self.P, (2, 0, 1))
