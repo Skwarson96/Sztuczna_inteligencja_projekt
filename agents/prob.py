@@ -58,8 +58,8 @@ class LocAgent:
         self.prev_action = None
 
         self.t = 0
-        prob = 1.0 / len(self.loc_with_orientation)
-        # prob = 1.0 / len(self.locations)
+        # prob = 1.0 / len(self.loc_with_orientation)
+        prob = 1.0 / len(self.locations)
         # P - macierz z prawdopodobienstwami dla kazdego pola
         self.P = prob * np.ones([len(self.locations)], dtype=np.float)
         # print(self.P, np.shape(self.P))
@@ -74,7 +74,7 @@ class LocAgent:
         # (4, 42, 1)
         print("START self.P", type(self.P), np.shape(self.P))
         # print(self.P)
-
+        self.O_prev = np.zeros([len(self.locations), 4, 4], dtype=np.float)
 
     def __call__(self, percept):
         # update posterior
@@ -85,7 +85,7 @@ class LocAgent:
         dir_to_idx = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
         # jezeli poprzednia akcja byl krok PROSTO
         if self.prev_action == 'forward':
-            print("test forward")
+            # print("test forward")
             for index2, direction in enumerate(dir_to_idx.keys()):
                 for index, loc in enumerate(self.locations):
                     next_loc = nextLoc((loc[0], loc[1]), direction)
@@ -101,7 +101,7 @@ class LocAgent:
 
         # jezeli poprzednia akcja byl skret w PRAWO
         if self.prev_action == 'turnright':
-            print("test turnright")
+            # print("test turnright")
             for index2, direction in enumerate(dir_to_idx.keys()):
                 for index, loc in enumerate(self.locations):
                     # prawdopodobienstwo ze sie obroci
@@ -111,7 +111,7 @@ class LocAgent:
 
         # jezeli poprzednia akcja byl skret w LEWO
         if self.prev_action == 'turnleft':
-            print("test turnleft")
+            # print("test turnleft")
             for index2, direction in enumerate(dir_to_idx.keys()):
                 for index, loc in enumerate(self.locations):
                     # prawdopodobienstwo ze sie obroci
@@ -121,7 +121,7 @@ class LocAgent:
 
         # jezeli poprzednia akcja jest rowna None (poczatek!)
         if self.prev_action == None:
-            print("test None")
+            # print("test None")
             for index2, direction in enumerate(dir_to_idx.keys()):
                 for index, loc in enumerate(self.locations):
                     # prawdopodobienstwo ze sie obroci
@@ -157,8 +157,6 @@ class LocAgent:
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
 
                             if obstale == ('fwd' in p):
-                                # print("test : ", (d in percept))
-                                # print("testt1",per, "d: ", d, index)
                                 prob *= (1 - self.eps_perc)
                             else:
                                 # print('test 2')
@@ -170,8 +168,6 @@ class LocAgent:
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
                             if obstale == ('right' in p):
-                                # print("test : ", (d in percept))
-                                # print("testt1",per, "d: ", d, index)
                                 prob *= (1 - self.eps_perc)
                             else:
                                 # print('test 2')
@@ -183,8 +179,6 @@ class LocAgent:
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
                             if obstale == ('bckwd' in p):
-                                # print("test : ", (d in percept))
-                                # print("testt1",per, "d: ", d, index)
                                 prob *= (1 - self.eps_perc)
                             else:
                                 # print('test 2')
@@ -196,8 +190,6 @@ class LocAgent:
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
                             if obstale == ('left' in p):
-                                # print("test : ", (d in percept))
-                                # print("testt1",per, "d: ", d, index)
                                 prob *= (1 - self.eps_perc)
                             else:
                                 # print('test 2')
@@ -215,8 +207,6 @@ class LocAgent:
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
 
                             if obstale == ('fwd' in p):
-                                # print("test : ", (d in percept))
-                                # print("testt1",per, "d: ", d, index)
                                 prob *= (1 - self.eps_perc)
                             else:
                                 # print('test 2')
@@ -228,8 +218,6 @@ class LocAgent:
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
                             if obstale == ('right' in p):
-                                # print("test : ", (d in percept))
-                                # print("testt1",per, "d: ", d, index)
                                 prob *= (1 - self.eps_perc)
                             else:
                                 # print('test 2')
@@ -241,8 +229,6 @@ class LocAgent:
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
                             if obstale == ('bckwd' in p):
-                                # print("test : ", (d in percept))
-                                # print("testt1",per, "d: ", d, index)
                                 prob *= (1 - self.eps_perc)
                             else:
                                 # print('test 2')
@@ -254,8 +240,6 @@ class LocAgent:
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
                             if obstale == ('left' in p):
-                                # print("test : ", (d in percept))
-                                # print("testt1",per, "d: ", d, index)
                                 prob *= (1 - self.eps_perc)
                             else:
                                 # print('test 2')
@@ -271,10 +255,7 @@ class LocAgent:
                             d = 'S'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-
                             if obstale == ('fwd' in p):
-                                # print("test : ", (d in percept))
-                                # print("testt1",per, "d: ", d, index)
                                 prob *= (1 - self.eps_perc)
                             else:
                                 # print('test 2')
@@ -286,8 +267,6 @@ class LocAgent:
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
                             if obstale == ('right' in p):
-                                # print("test : ", (d in percept))
-                                # print("testt1",per, "d: ", d, index)
                                 prob *= (1 - self.eps_perc)
                             else:
                                 # print('test 2')
@@ -299,8 +278,6 @@ class LocAgent:
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
                             if obstale == ('bckwd' in p):
-                                # print("test : ", (d in percept))
-                                # print("testt1",per, "d: ", d, index)
                                 prob *= (1 - self.eps_perc)
                             else:
                                 # print('test 2')
@@ -312,8 +289,6 @@ class LocAgent:
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
                             if obstale == ('left' in p):
-                                # print("test : ", (d in percept))
-                                # print("testt1",per, "d: ", d, index)
                                 prob *= (1 - self.eps_perc)
                             else:
                                 # print('test 2')
@@ -331,8 +306,6 @@ class LocAgent:
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
 
                             if obstale == ('fwd' in p):
-                                # print("test : ", (d in percept))
-                                # print("testt1",per, "d: ", d, index)
                                 prob *= (1 - self.eps_perc)
                             else:
                                 # print('test 2')
@@ -344,8 +317,6 @@ class LocAgent:
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
                             if obstale == ('right' in p):
-                                # print("test : ", (d in percept))
-                                # print("testt1",per, "d: ", d, index)
                                 prob *= (1 - self.eps_perc)
                             else:
                                 # print('test 2')
@@ -357,8 +328,6 @@ class LocAgent:
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
                             if obstale == ('bckwd' in p):
-                                # print("test : ", (d in percept))
-                                # print("testt1",per, "d: ", d, index)
                                 prob *= (1 - self.eps_perc)
                             else:
                                 # print('test 2')
@@ -370,8 +339,6 @@ class LocAgent:
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
                             if obstale == ('left' in p):
-                                # print("test : ", (d in percept))
-                                # print("testt1",per, "d: ", d, index)
                                 prob *= (1 - self.eps_perc)
                             else:
                                 # print('test 2')
@@ -379,6 +346,11 @@ class LocAgent:
                             prob = round(prob, 4)
                         O[index, 3, i] = prob
 
+        # Gdy czujnik nic nie wykryje
+        if len(percept) == 0:
+            O = self.O_prev
+        else:
+            self.O_prev = O
 
 
         print("np.shape(O)",np.shape(O))
@@ -407,12 +379,13 @@ class LocAgent:
         # self.P = T.transpose() @ self.P
         # print(self.P)
         self.P = T @ self.P
-
+        print("self.P = T @ self.P")
+        # print(self.P)
         print("self.P 2 ", type(self.P), np.shape(self.P))
         # self.P = np.transpose(T, (1, 2, 0)) @ self.P
 
         self.P = O * self.P
-
+        # print(self.P)
         # print(self.P)
         # print(O)
         self.P /= np.sum(self.P)
@@ -420,7 +393,7 @@ class LocAgent:
 
         # print(np.max(self.P))
         # print(type(self.P), np.shape(self.P))
-        print(self.P)
+        # print(self.P)
         # -----------------------
 
 
