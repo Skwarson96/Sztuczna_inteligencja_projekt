@@ -135,26 +135,268 @@ class LocAgent:
         # print(T)
         # print("percept ", percept)
         # ['fwd', 'right', 'left', 'bckwd']
-        percept2 = ['fwd', 'right', 'left', 'bckwd']
+        rel_dirs = {'fwd': 0, 'right': 1, 'bckwd': 2, 'left': 3}
 
-        O = np.zeros([len(self.locations),1, 4], dtype=np.float)
+        O = np.zeros([len(self.locations), 4, 4], dtype=np.float)
+        per = percept
+        # print(per)
+        for idx, p in enumerate(per):
+            if p == 'bump':
+                del per[idx]
+        # print(per)
 
         for index, loc in enumerate(self.locations):
             # print(loc)
             prob = 1.0
-            for idx , d in enumerate(['N', 'E', 'S', 'W']):
-                for per in percept:
-                    nh_loc = nextLoc((loc[0], loc[1]), d)
-                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                    if obstale == (per in percept2):
-                        # print("test : ", (d in percept))
-                        # print("testt1", "d: ", d, index)
-                        prob *= (1 - self.eps_perc)
-                    else:
-                        # print('test 2')
-                        prob *= self.eps_perc
-                    prob = round(prob, 4)
-                O[index, 0, idx] = prob
+            for i in range(4):
+                # grot gora
+                if i == 0:
+                    # fwd = N
+                    for idx, p in enumerate(per):
+                        if p == 'fwd':
+                            d = 'N'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+
+                            if obstale == ('fwd' in p):
+                                # print("test : ", (d in percept))
+                                # print("testt1",per, "d: ", d, index)
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                # print('test 2')
+                                prob *= self.eps_perc
+                            prob = round(prob, 4)
+                        O[index, 0, i] = prob
+                        if p == 'right':
+                            d = 'E'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == ('right' in p):
+                                # print("test : ", (d in percept))
+                                # print("testt1",per, "d: ", d, index)
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                # print('test 2')
+                                prob *= self.eps_perc
+                            prob = round(prob, 4)
+                        O[index, 1, i] = prob
+                        if p == 'bckwd':
+                            d = 'S'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == ('bckwd' in p):
+                                # print("test : ", (d in percept))
+                                # print("testt1",per, "d: ", d, index)
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                # print('test 2')
+                                prob *= self.eps_perc
+                            prob = round(prob, 4)
+                        O[index, 2, i] = prob
+                        if p == 'left':
+                            d = 'W'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == ('left' in p):
+                                # print("test : ", (d in percept))
+                                # print("testt1",per, "d: ", d, index)
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                # print('test 2')
+                                prob *= self.eps_perc
+                            prob = round(prob, 4)
+                        O[index, 3, i] = prob
+
+                # grot prawo
+                if i == 1:
+                    # fwd = E
+                    for idx, p in enumerate(per):
+                        if p == 'fwd':
+                            d = 'E'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+
+                            if obstale == ('fwd' in p):
+                                # print("test : ", (d in percept))
+                                # print("testt1",per, "d: ", d, index)
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                # print('test 2')
+                                prob *= self.eps_perc
+                            prob = round(prob, 4)
+                        O[index, 0, i] = prob
+                        if p == 'right':
+                            d = 'S'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == ('right' in p):
+                                # print("test : ", (d in percept))
+                                # print("testt1",per, "d: ", d, index)
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                # print('test 2')
+                                prob *= self.eps_perc
+                            prob = round(prob, 4)
+                        O[index, 1, i] = prob
+                        if p == 'bckwd':
+                            d = 'W'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == ('bckwd' in p):
+                                # print("test : ", (d in percept))
+                                # print("testt1",per, "d: ", d, index)
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                # print('test 2')
+                                prob *= self.eps_perc
+                            prob = round(prob, 4)
+                        O[index, 2, i] = prob
+                        if p == 'left':
+                            d = 'N'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == ('left' in p):
+                                # print("test : ", (d in percept))
+                                # print("testt1",per, "d: ", d, index)
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                # print('test 2')
+                                prob *= self.eps_perc
+                            prob = round(prob, 4)
+                        O[index, 3, i] = prob
+
+                # grot dol
+                if i == 2:
+                    # fwd = S
+                    for idx, p in enumerate(per):
+                        if p == 'fwd':
+                            d = 'S'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+
+                            if obstale == ('fwd' in p):
+                                # print("test : ", (d in percept))
+                                # print("testt1",per, "d: ", d, index)
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                # print('test 2')
+                                prob *= self.eps_perc
+                            prob = round(prob, 4)
+                        O[index, 0, i] = prob
+                        if p == 'right':
+                            d = 'W'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == ('right' in p):
+                                # print("test : ", (d in percept))
+                                # print("testt1",per, "d: ", d, index)
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                # print('test 2')
+                                prob *= self.eps_perc
+                            prob = round(prob, 4)
+                        O[index, 1, i] = prob
+                        if p == 'bckwd':
+                            d = 'N'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == ('bckwd' in p):
+                                # print("test : ", (d in percept))
+                                # print("testt1",per, "d: ", d, index)
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                # print('test 2')
+                                prob *= self.eps_perc
+                            prob = round(prob, 4)
+                        O[index, 2, i] = prob
+                        if p == 'left':
+                            d = 'E'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == ('left' in p):
+                                # print("test : ", (d in percept))
+                                # print("testt1",per, "d: ", d, index)
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                # print('test 2')
+                                prob *= self.eps_perc
+                            prob = round(prob, 4)
+                        O[index, 3, i] = prob
+
+                # grot lewo
+                if i == 3:
+                    # fwd = N
+                    for idx, p in enumerate(per):
+                        if p == 'fwd':
+                            d = 'W'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+
+                            if obstale == ('fwd' in p):
+                                # print("test : ", (d in percept))
+                                # print("testt1",per, "d: ", d, index)
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                # print('test 2')
+                                prob *= self.eps_perc
+                            prob = round(prob, 4)
+                        O[index, 0, i] = prob
+                        if p == 'right':
+                            d = 'N'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == ('right' in p):
+                                # print("test : ", (d in percept))
+                                # print("testt1",per, "d: ", d, index)
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                # print('test 2')
+                                prob *= self.eps_perc
+                            prob = round(prob, 4)
+                        O[index, 1, i] = prob
+                        if p == 'bckwd':
+                            d = 'E'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == ('bckwd' in p):
+                                # print("test : ", (d in percept))
+                                # print("testt1",per, "d: ", d, index)
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                # print('test 2')
+                                prob *= self.eps_perc
+                            prob = round(prob, 4)
+                        O[index, 2, i] = prob
+                        if p == 'left':
+                            d = 'S'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == ('left' in p):
+                                # print("test : ", (d in percept))
+                                # print("testt1",per, "d: ", d, index)
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                # print('test 2')
+                                prob *= self.eps_perc
+                            prob = round(prob, 4)
+                        O[index, 3, i] = prob
+
+
+            # for idx , d in enumerate(['N', 'E', 'S', 'W']):
+            #     nh_loc = nextLoc((loc[0], loc[1]), d)
+            #     obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+            #     # if obstale ==
+            #
+            #     for per in percept:
+            #         if obstale == (per in percept2):
+            #             # print("test : ", (d in percept))
+            #             # print("testt1",per, "d: ", d, index)
+            #             prob *= (1 - self.eps_perc)
+            #         else:
+            #             # print('test 2')
+            #             prob *= self.eps_perc
+            #         prob = round(prob, 4)
+            #     O[index, 0, idx] = prob
 
             # for per2 in percept:
             #     if per2 == 'fwd':
@@ -234,7 +476,7 @@ class LocAgent:
 
 
         print("np.shape(O)",np.shape(O))
-        print(O)
+        # print(O)
         O = np.transpose(O, (2, 0, 1))
         print("np.shape(O)",np.shape(O))
         # print(np.shape(T))
@@ -262,11 +504,14 @@ class LocAgent:
 
         print("self.P 2 ", type(self.P), np.shape(self.P))
         # self.P = np.transpose(T, (1, 2, 0)) @ self.P
+
         self.P = O * self.P
+
         # print(self.P)
         # print(O)
-        # self.P /= np.sum(self.P)
+        self.P /= np.sum(self.P)
         print("self.P 3 ", type(self.P), np.shape(self.P))
+
         # print(np.max(self.P))
         # print(type(self.P), np.shape(self.P))
         # print(self.P)
@@ -329,10 +574,6 @@ class LocAgent:
 
         return action
 
-
-
-
-
     def getPosterior(self):
         # directions in order 'N', 'E', 'S', 'W'
         P_arr = np.zeros([self.size, self.size, 4], dtype=np.float)
@@ -375,7 +616,7 @@ class LocAgent:
                 #     P_arr[loc[0], loc[1], index2] = 1
                 # P_arr[loc[0], loc[1], index2] = 1.0
         print("P_arr ",type(P_arr), np.shape(P_arr))
-        # print(P_arr)
+        print(P_arr)
         #
 
         # self.P = np.transpose(self.P, (2, 0, 1))
