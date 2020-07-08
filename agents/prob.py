@@ -145,61 +145,66 @@ class LocAgent:
 
         for index, loc in enumerate(self.locations):
             # print(loc)
-            prob = 1.0
+            # prob = 1.0
             for i in range(4):
                 # grot gora
                 if i == 0:
+                    # print("test")
                     # fwd = N
+                    prob = 1.0
                     for idx, p in enumerate(per):
                         if p == 'fwd':
                             d = 'N'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            # if obstale == ('fwd' in p):
+                            prob *= (1 - self.eps_perc)
 
-                            if obstale == ('fwd' in p):
-                                prob *= (1 - self.eps_perc)
-                            else:
+                        else:
                                 # print('test 2')
-                                prob *= self.eps_perc
-                            prob = round(prob, 4)
+                            prob *= self.eps_perc
+                        prob = round(prob, 4)
                         O[index, 0, i] = prob
+
                         if p == 'right':
                             d = 'E'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                            if obstale == ('right' in p):
-                                prob *= (1 - self.eps_perc)
-                            else:
+                            # if obstale == ('right' in p):
+                            prob *= (1 - self.eps_perc)
+                        else:
                                 # print('test 2')
-                                prob *= self.eps_perc
-                            prob = round(prob, 4)
+                            prob *= self.eps_perc
+                        prob = round(prob, 4)
                         O[index, 1, i] = prob
                         if p == 'bckwd':
                             d = 'S'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                            if obstale == ('bckwd' in p):
-                                prob *= (1 - self.eps_perc)
-                            else:
+                            # if obstale == ('bckwd' in p):
+                            prob *= (1 - self.eps_perc)
+                        else:
                                 # print('test 2')
-                                prob *= self.eps_perc
-                            prob = round(prob, 4)
+                            prob *= self.eps_perc
+                        prob = round(prob, 4)
                         O[index, 2, i] = prob
+
                         if p == 'left':
                             d = 'W'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                            if obstale == ('left' in p):
-                                prob *= (1 - self.eps_perc)
-                            else:
-                                # print('test 2')
-                                prob *= self.eps_perc
-                            prob = round(prob, 4)
+                            # if obstale == ('left' in p):
+                            prob *= (1 - self.eps_perc)
+                        else:
+                            # print('test 2')
+                            prob *= self.eps_perc
+                        prob = round(prob, 4)
                         O[index, 3, i] = prob
 
                 # grot prawo
                 if i == 1:
                     # fwd = E
+                    prob = 1.0
                     for idx, p in enumerate(per):
                         if p == 'fwd':
                             d = 'E'
@@ -250,6 +255,7 @@ class LocAgent:
                 # grot dol
                 if i == 2:
                     # fwd = S
+                    prob = 1.0
                     for idx, p in enumerate(per):
                         if p == 'fwd':
                             d = 'S'
@@ -299,6 +305,7 @@ class LocAgent:
                 # grot lewo
                 if i == 3:
                     # fwd = N
+                    prob = 1.0
                     for idx, p in enumerate(per):
                         if p == 'fwd':
                             d = 'W'
@@ -375,7 +382,9 @@ class LocAgent:
 
         print("self.P", type(self.P), np.shape(self.P))
         print("T", type(T), np.shape(T))
+        # print(T)
         print("O", type(O), np.shape(O))
+        # print(O)
         # self.P = T.transpose() @ self.P
         # print(self.P)
         self.P = T @ self.P
