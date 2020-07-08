@@ -72,9 +72,11 @@ class LocAgent:
         # self.P = np.transpose(self.P, (0, 1, 2))
         self.P = np.transpose(self.P, (0, 2, 1))
         # (4, 42, 1)
-        print("START self.P", type(self.P), np.shape(self.P))
+        # print("START self.P", type(self.P), np.shape(self.P))
         # print(self.P)
         self.O_prev = np.zeros([len(self.locations), 4, 4], dtype=np.float)
+        self.next_action = 'fwd'
+        self.nawrotka = False
 
     def __call__(self, percept):
         # update posterior
@@ -129,7 +131,7 @@ class LocAgent:
 
 
         T = np.transpose(T, (2, 0, 1))
-        print(np.shape(T))
+        # print(np.shape(T))
         # print(T)
         # print("percept ", percept)
         # ['fwd', 'right', 'left', 'bckwd']
@@ -498,7 +500,7 @@ class LocAgent:
 
         # self.P = np.transpose(self.P, (0, 2, 1))
 
-        print("self.P", type(self.P), np.shape(self.P))
+        # print("self.P", type(self.P), np.shape(self.P))
         # print("T", type(T), np.shape(T))
         # print(T)
         # print("O", type(O), np.shape(O))
@@ -506,9 +508,9 @@ class LocAgent:
         # self.P = T.transpose() @ self.P
         # print(self.P)
         self.P = T @ self.P
-        print("self.P = T @ self.P")
+        # print("self.P = T @ self.P")
         # print(self.P)
-        print("self.P 2 ", type(self.P), np.shape(self.P))
+        # print("self.P 2 ", type(self.P), np.shape(self.P))
         # self.P = np.transpose(T, (1, 2, 0)) @ self.P
 
         self.P = O * self.P
@@ -516,29 +518,48 @@ class LocAgent:
         # print(self.P)
         # print(O)
         self.P /= np.sum(self.P)
-        print("self.P 3 ", type(self.P), np.shape(self.P))
+        # print("self.P 3 ", type(self.P), np.shape(self.P))
 
         # print(np.max(self.P))
         # print(type(self.P), np.shape(self.P))
         # print(self.P)
         # -----------------------
-
-
-
+        
         action = 'forward'
         # TODO CHANGE THIS HEURISTICS TO SPEED UP CONVERGENCE
 
-        # if there is a wall ahead then lets turn
-        #         rel_dirs = {'fwd': 0, 'right': 1, 'bckwd': 2, 'left': 3}
+        if percept == ['fwd', 'right', 'left']:
+            # print('nawrotka 1')
+            self.nawrotka = True
+            action = 'turnleft'
+            return action
+
+        if self.nawrotka == True:
+            # print('nawrotka 2')
+            self.nawrotka = False
+            action = 'turnleft'
+            return action
+
+        if percept == [ 'right', 'bckwd', 'left']:
+            action = 'forward'
+            return action
+
         if 'fwd' in percept:
             # higher chance of turning left to avoid getting stuck in one location
-            action = np.random.choice(['turnleft', 'turnright'], 1, p=[0.8, 0.2])
-        else:
-            # prefer moving forward to explore
-            action = np.random.choice(['forward', 'turnleft', 'turnright'], 1, p=[0.8, 0.1, 0.1])
+            action = np.random.choice(['turnleft', 'turnright'], 1, p=[0.5, 0.5])
+            if self.prev_action == 'turnleft':
+                action = 'turnleft'
+            if self.prev_action == 'turnright':
+                action = 'turnright'
+            return action
 
-        ilosc = len(percept)
+        if percept == [ 'right']  or percept == ['fwd', 'right'] :
+            action = np.random.choice(['turnleft', 'forward'], 1, p=[0.5, 0.5])
+            return action
 
+        if percept == ['left'] or percept == ['fwd', 'left']:
+            action = np.random.choice(['turnright', 'forward'], 1, p=[0.5, 0.5])
+            return action
 
 
         self.prev_action = action
@@ -548,8 +569,9 @@ class LocAgent:
     def getPosterior(self):
         # directions in order 'N', 'E', 'S', 'W'
         P_arr = np.zeros([self.size, self.size, 4], dtype=np.float)
-        print("P_arr ",type(P_arr), np.shape(P_arr))
-        print("self.P 4 ", type(self.P), np.shape(self.P))
+        # print("P_arr ",type(P_arr), np.shape(P_arr))
+        # print("self.P 4 ", type(self.P), np.shape(self.P))
+        # print(self.P)
         # print(self.P)
         # put probabilities in the array
         # metoda ma zwracac macierz z wartosciami rozkladu o wymiarach: [size, size, 4]
@@ -586,7 +608,9 @@ class LocAgent:
                 # if index2 == 1:
                 #     P_arr[loc[0], loc[1], index2] = 1
                 # P_arr[loc[0], loc[1], index2] = 1.0
-        print("P_arr ",type(P_arr), np.shape(P_arr))
+        # print("P_arr 1",type(P_arr), np.shape(P_arr))
+        # P_arr = np.transpose(P_arr, (2, 0, 1))
+        # print("P_arr 2",type(P_arr), np.shape(P_arr))
         # print(P_arr)
         #
 
