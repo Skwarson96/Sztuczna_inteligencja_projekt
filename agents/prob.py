@@ -135,7 +135,7 @@ class LocAgent:
         # ['fwd', 'right', 'left', 'bckwd']
         rel_dirs = {'fwd': 0, 'right': 1, 'bckwd': 2, 'left': 3}
 
-        O = np.zeros([len(self.locations), 4, 4], dtype=np.float)
+        O = np.zeros([len(self.locations), 1, 4], dtype=np.float)
         per = percept
         # print(per)
         for idx, p in enumerate(per):
@@ -157,49 +157,83 @@ class LocAgent:
                             d = 'N'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                            # if obstale == ('fwd' in p):
-                            prob *= (1 - self.eps_perc)
-
-                        else:
+                            if obstale == True:
+                                prob *= (1 - self.eps_perc)
+                            else:
                                 # print('test 2')
-                            prob *= self.eps_perc
-                        prob = round(prob, 4)
-                        O[index, 0, i] = prob
+                                prob *= self.eps_perc
+                        else:
+                            d = 'N'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == False:
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+                            # prob *= self.eps_perc
+
+                        # prob = round(prob, 4)
+                        # O[index, 0, i] = prob
 
                         if p == 'right':
                             d = 'E'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                            # if obstale == ('right' in p):
-                            prob *= (1 - self.eps_perc)
-                        else:
+                            if obstale == True:
+                                prob *= (1 - self.eps_perc)
+                            else:
                                 # print('test 2')
-                            prob *= self.eps_perc
-                        prob = round(prob, 4)
-                        O[index, 1, i] = prob
+                                prob *= self.eps_perc
+                        else:
+                            d = 'E'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == False:
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+
+
+                        # prob = round(prob, 4)
+                        # O[index, 1, i] = prob
                         if p == 'bckwd':
                             d = 'S'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                            # if obstale == ('bckwd' in p):
-                            prob *= (1 - self.eps_perc)
-                        else:
+                            if obstale == True:
+                                prob *= (1 - self.eps_perc)
+                            else:
                                 # print('test 2')
-                            prob *= self.eps_perc
-                        prob = round(prob, 4)
-                        O[index, 2, i] = prob
+                                prob *= self.eps_perc
+                        else:
+                            d = 'S'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == False:
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+                        # O[index, 2, i] = prob
 
                         if p == 'left':
                             d = 'W'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                            # if obstale == ('left' in p):
-                            prob *= (1 - self.eps_perc)
+                            if obstale == True:
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
                         else:
-                            # print('test 2')
-                            prob *= self.eps_perc
-                        prob = round(prob, 4)
-                        O[index, 3, i] = prob
+                            d = 'W'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == False:
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+
+                    prob = round(prob, 4)
+                    O[index, 0, i] = prob
 
                 # grot prawo
                 if i == 1:
@@ -210,47 +244,75 @@ class LocAgent:
                             d = 'E'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-
-                            if obstale == ('fwd' in p):
+                            if obstale == True:
                                 prob *= (1 - self.eps_perc)
                             else:
-                                # print('test 2')
                                 prob *= self.eps_perc
-                            prob = round(prob, 4)
-                        O[index, 0, i] = prob
+                        else:
+                            d = 'E'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == False:
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+
                         if p == 'right':
                             d = 'S'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                            if obstale == ('right' in p):
+                            if obstale == True:
                                 prob *= (1 - self.eps_perc)
                             else:
                                 # print('test 2')
                                 prob *= self.eps_perc
-                            prob = round(prob, 4)
-                        O[index, 1, i] = prob
+                        else:
+                            d = 'S'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == False:
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+
                         if p == 'bckwd':
                             d = 'W'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                            if obstale == ('bckwd' in p):
+                            if obstale == True:
                                 prob *= (1 - self.eps_perc)
                             else:
                                 # print('test 2')
                                 prob *= self.eps_perc
-                            prob = round(prob, 4)
-                        O[index, 2, i] = prob
+                        else:
+                            d = 'W'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == False:
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+
                         if p == 'left':
                             d = 'N'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                            if obstale == ('left' in p):
+                            if obstale == True:
                                 prob *= (1 - self.eps_perc)
                             else:
                                 # print('test 2')
                                 prob *= self.eps_perc
-                            prob = round(prob, 4)
-                        O[index, 3, i] = prob
+                        else:
+                            d = 'N'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == False:
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+
+                    prob = round(prob, 4)
+                    O[index, 0, i] = prob
 
                 # grot dol
                 if i == 2:
@@ -261,46 +323,72 @@ class LocAgent:
                             d = 'S'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                            if obstale == ('fwd' in p):
+                            if obstale == True:
                                 prob *= (1 - self.eps_perc)
                             else:
-                                # print('test 2')
                                 prob *= self.eps_perc
-                            prob = round(prob, 4)
-                        O[index, 0, i] = prob
+                        else:
+                            d = 'S'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == False:
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+
                         if p == 'right':
                             d = 'W'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                            if obstale == ('right' in p):
+                            if obstale == True:
                                 prob *= (1 - self.eps_perc)
                             else:
-                                # print('test 2')
                                 prob *= self.eps_perc
-                            prob = round(prob, 4)
-                        O[index, 1, i] = prob
+                        else:
+                            d = 'W'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == False:
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+
                         if p == 'bckwd':
                             d = 'N'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                            if obstale == ('bckwd' in p):
+                            if obstale == True:
                                 prob *= (1 - self.eps_perc)
                             else:
-                                # print('test 2')
                                 prob *= self.eps_perc
-                            prob = round(prob, 4)
-                        O[index, 2, i] = prob
+                        else:
+                            d = 'N'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == False:
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+
                         if p == 'left':
                             d = 'E'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                            if obstale == ('left' in p):
+                            if obstale == True:
                                 prob *= (1 - self.eps_perc)
                             else:
-                                # print('test 2')
                                 prob *= self.eps_perc
-                            prob = round(prob, 4)
-                        O[index, 3, i] = prob
+                        else:
+                            d = 'E'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == False:
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+
+                    prob = round(prob, 4)
+                    O[index, 0, i] = prob
 
                 # grot lewo
                 if i == 3:
@@ -311,47 +399,77 @@ class LocAgent:
                             d = 'W'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-
-                            if obstale == ('fwd' in p):
+                            if obstale == True:
                                 prob *= (1 - self.eps_perc)
                             else:
-                                # print('test 2')
                                 prob *= self.eps_perc
-                            prob = round(prob, 4)
-                        O[index, 0, i] = prob
+                        else:
+                            d = 'W'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == False:
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+
+
+
                         if p == 'right':
                             d = 'N'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                            if obstale == ('right' in p):
+                            if obstale == True:
                                 prob *= (1 - self.eps_perc)
                             else:
-                                # print('test 2')
                                 prob *= self.eps_perc
-                            prob = round(prob, 4)
-                        O[index, 1, i] = prob
+                        else:
+                            d = 'N'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == False:
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+
+
                         if p == 'bckwd':
                             d = 'E'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                            if obstale == ('bckwd' in p):
+                            if obstale == True:
                                 prob *= (1 - self.eps_perc)
                             else:
-                                # print('test 2')
                                 prob *= self.eps_perc
-                            prob = round(prob, 4)
-                        O[index, 2, i] = prob
+                        else:
+                            d = 'E'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == False:
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+
+
                         if p == 'left':
                             d = 'S'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                            if obstale == ('left' in p):
+                            if obstale == True:
                                 prob *= (1 - self.eps_perc)
                             else:
-                                # print('test 2')
                                 prob *= self.eps_perc
-                            prob = round(prob, 4)
-                        O[index, 3, i] = prob
+                        else:
+                            d = 'S'
+                            nh_loc = nextLoc((loc[0], loc[1]), d)
+                            obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            if obstale == False:
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+
+
+                    prob = round(prob, 5)
+                    O[index, 0, i] = prob
 
         # Gdy czujnik nic nie wykryje
         if len(percept) == 0:
@@ -360,10 +478,10 @@ class LocAgent:
             self.O_prev = O
 
 
-        print("np.shape(O)",np.shape(O))
+        # print("np.shape(O)",np.shape(O))
         # print(O)
         O = np.transpose(O, (2, 0, 1))
-        print("np.shape(O)",np.shape(O))
+        # print("np.shape(O)",np.shape(O))
         # print(np.shape(T))
         # print(O)
         # self.t += 1
@@ -381,9 +499,9 @@ class LocAgent:
         # self.P = np.transpose(self.P, (0, 2, 1))
 
         print("self.P", type(self.P), np.shape(self.P))
-        print("T", type(T), np.shape(T))
+        # print("T", type(T), np.shape(T))
         # print(T)
-        print("O", type(O), np.shape(O))
+        # print("O", type(O), np.shape(O))
         # print(O)
         # self.P = T.transpose() @ self.P
         # print(self.P)
