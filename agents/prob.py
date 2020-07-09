@@ -58,8 +58,8 @@ class LocAgent:
         self.prev_action = None
 
         self.t = 0
-        # prob = 1.0 / len(self.loc_with_orientation)
-        prob = 1.0 / len(self.locations)
+        prob = 1.0 / len(self.loc_with_orientation)
+        # prob = 1.0 / len(self.locations)
         # P - macierz z prawdopodobienstwami dla kazdego pola
         self.P = prob * np.ones([len(self.locations)], dtype=np.float)
         # print(self.P, np.shape(self.P))
@@ -71,9 +71,6 @@ class LocAgent:
         # print(np.shape(self.P))
         # self.P = np.transpose(self.P, (0, 1, 2))
         self.P = np.transpose(self.P, (0, 2, 1))
-        # (4, 42, 1)
-        # print("START self.P", type(self.P), np.shape(self.P))
-        # print(self.P)
         self.O_prev = np.zeros([len(self.locations), 4, 4], dtype=np.float)
         self.next_action = 'fwd'
         self.nawrotka = False
@@ -129,13 +126,6 @@ class LocAgent:
                     # prawdopodobienstwo ze sie obroci
                     T[index, index, index2] = 1.0
 
-
-        T = np.transpose(T, (2, 0, 1))
-        # print(np.shape(T))
-        # print(T)
-        # print("percept ", percept)
-        # ['fwd', 'right', 'left', 'bckwd']
-        rel_dirs = {'fwd': 0, 'right': 1, 'bckwd': 2, 'left': 3}
 
         O = np.zeros([len(self.locations), 1, 4], dtype=np.float)
         per = percept
@@ -480,18 +470,16 @@ class LocAgent:
             self.O_prev = O
 
 
-        # print("np.shape(O)",np.shape(O))
-        # print(O)
-        O = np.transpose(O, (2, 0, 1))
-        # print("np.shape(O)",np.shape(O))
-        # print(np.shape(T))
-        # print(O)
         # self.t += 1
-
-        # print("macierz T ", type(T), np.shape(T))
+        print("macierz T 1", type(T), np.shape(T))
+        # T = np.transpose(T, (2, 0, 1))
+        T = np.transpose(T, (2, 1, 0))
+        print("macierz T 2", type(T), np.shape(T))
         # print("macierz T.transpose() ", type(T), np.shape(T.transpose()))
-        # print("macierz O ", type(O), np.shape(O))
-        # print("self.P", type(self.P), np.shape(self.P))
+        print("macierz O 1", type(O), np.shape(O))
+        O = np.transpose(O, (2, 0, 1))
+        print("macierz O 2 ", type(O), np.shape(O))
+        print("self.P", type(self.P), np.shape(self.P))
         # print(T)
         # print(O)
         # print(self.P)
@@ -524,7 +512,7 @@ class LocAgent:
         # print(type(self.P), np.shape(self.P))
         # print(self.P)
         # -----------------------
-        
+
         action = 'forward'
         # TODO CHANGE THIS HEURISTICS TO SPEED UP CONVERGENCE
 
@@ -569,53 +557,13 @@ class LocAgent:
     def getPosterior(self):
         # directions in order 'N', 'E', 'S', 'W'
         P_arr = np.zeros([self.size, self.size, 4], dtype=np.float)
-        # print("P_arr ",type(P_arr), np.shape(P_arr))
-        # print("self.P 4 ", type(self.P), np.shape(self.P))
-        # print(self.P)
-        # print(self.P)
-        # put probabilities in the array
-        # metoda ma zwracac macierz z wartosciami rozkladu o wymiarach: [size, size, 4]
-        # 4 wartosci, po jednej dla kazdego kierunku
 
         # TODO PUT YOUR CODE HERE
-        # print("self.locations ",type(self.locations), np.shape(self.locations))
-        # print("self.P ",type(self.P), np.shape(self.P))
-        # self.P = np.transpose(self.P, (1, 2, 0))
-        # print("self.P ",type(self.P), np.shape(self.P))
-        # print(self.P)
-        #
-        # for idx, loc in enumerate(self.locations):
-        #     # print(idx, loc, self.P[loc[2], idx])
-        #     # for index2 in range(4):
-        #     #     # print(idx, loc,np.shape(self.P[idx, index2] ))
-        #     #     # print(loc[0], loc[1], index2, self.P[idx, index2, index2])
-        #     #     # P_arr[loc[0], loc[1], index2] = 0.1
-        #     P_arr[loc[0], loc[1], loc[2]] = self.P[loc[2],idx]
-                #          prob = 1.0 / len(self.locations)
-                # print("test")
-                # print(P_arr[loc[0], loc[1], index2])
-        # print(P_arr)
-        # print(np.max(P_arr))
+
         for index2 in range(4):
             for idx, loc in enumerate(self.locations):
-                # print(type(self.locations), np.shape(self.locations))
-                # print(type(self.P[idx]), np.shape(self.P[idx, index2]))
-                # print(self.P[idx, index2])
-                # print(idx, loc)
-                # print("self.P ", type(self.P), np.shape(self.P))
-                # print(self.P[index2, idx, 0])
-                P_arr[loc[0], loc[1], index2] = self.P[index2, idx, 0]
-                # if index2 == 1:
-                #     P_arr[loc[0], loc[1], index2] = 1
-                # P_arr[loc[0], loc[1], index2] = 1.0
-        # print("P_arr 1",type(P_arr), np.shape(P_arr))
-        # P_arr = np.transpose(P_arr, (2, 0, 1))
-        # print("P_arr 2",type(P_arr), np.shape(P_arr))
-        # print(P_arr)
-        #
 
-        # self.P = np.transpose(self.P, (2, 0, 1))
-        # print("self.P ",type(self.P), np.shape(self.P))
+                P_arr[loc[0], loc[1], index2] = self.P[index2, idx, 0]
 
         # -----------------------
         return P_arr
