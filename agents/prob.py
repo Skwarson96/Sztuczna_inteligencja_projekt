@@ -98,6 +98,7 @@ class LocAgent:
                     else:
                         T[index,index, index2] = 1.0
 
+        # print('self.prev_action ', self.prev_action)
         # jezeli poprzednia akcja byl skret w PRAWO
         if self.prev_action == 'turnright':
             # print("test turnright")
@@ -129,11 +130,9 @@ class LocAgent:
 
         O = np.zeros([len(self.locations), 1, 4], dtype=np.float)
         per = percept
-        # print(per)
         for idx, p in enumerate(per):
             if p == 'bump':
                 del per[idx]
-        # print(per)
 
         for index, loc in enumerate(self.locations):
             # print(loc)
@@ -141,7 +140,6 @@ class LocAgent:
             for i in range(4):
                 # grot gora
                 if i == 0:
-                    # print("test")
                     # fwd = N
                     prob = 1.0
                     for idx, p in enumerate(per):
@@ -152,7 +150,6 @@ class LocAgent:
                             if obstale == True:
                                 prob *= (1 - self.eps_perc)
                             else:
-                                # print('test 2')
                                 prob *= self.eps_perc
                         else:
                             d = 'N'
@@ -162,10 +159,6 @@ class LocAgent:
                                 prob *= (1 - self.eps_perc)
                             else:
                                 prob *= self.eps_perc
-                            # prob *= self.eps_perc
-
-                        # prob = round(prob, 4)
-                        # O[index, 0, i] = prob
 
                         if p == 'right':
                             d = 'E'
@@ -174,7 +167,6 @@ class LocAgent:
                             if obstale == True:
                                 prob *= (1 - self.eps_perc)
                             else:
-                                # print('test 2')
                                 prob *= self.eps_perc
                         else:
                             d = 'E'
@@ -185,9 +177,6 @@ class LocAgent:
                             else:
                                 prob *= self.eps_perc
 
-
-                        # prob = round(prob, 4)
-                        # O[index, 1, i] = prob
                         if p == 'bckwd':
                             d = 'S'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
@@ -195,7 +184,6 @@ class LocAgent:
                             if obstale == True:
                                 prob *= (1 - self.eps_perc)
                             else:
-                                # print('test 2')
                                 prob *= self.eps_perc
                         else:
                             d = 'S'
@@ -205,7 +193,6 @@ class LocAgent:
                                 prob *= (1 - self.eps_perc)
                             else:
                                 prob *= self.eps_perc
-                        # O[index, 2, i] = prob
 
                         if p == 'left':
                             d = 'W'
@@ -471,18 +458,19 @@ class LocAgent:
 
 
         # self.t += 1
-        print("macierz T 1", type(T), np.shape(T))
+        # print("macierz T 1", type(T), np.shape(T))
         # T = np.transpose(T, (2, 0, 1))
         T = np.transpose(T, (2, 1, 0))
-        print("macierz T 2", type(T), np.shape(T))
+        # print(T)
+        # print("macierz T 2", type(T), np.shape(T))
         # print("macierz T.transpose() ", type(T), np.shape(T.transpose()))
-        print("macierz O 1", type(O), np.shape(O))
+        # print("macierz O 1", type(O), np.shape(O))
         O = np.transpose(O, (2, 0, 1))
-        print("macierz O 2 ", type(O), np.shape(O))
-        print("self.P", type(self.P), np.shape(self.P))
+        # print("macierz O 2 ", type(O), np.shape(O))
+        # print("self.P", type(self.P), np.shape(self.P))
         # print(T)
         # print(O)
-        # print(self.P)
+        print(self.P)
 
         # print(type(O), np.shape(O))
 
@@ -495,18 +483,22 @@ class LocAgent:
         # print(O)
         # self.P = T.transpose() @ self.P
         # print(self.P)
+        # print("self.P 1", type(self.P), np.shape(self.P))
         self.P = T @ self.P
-        # print("self.P = T @ self.P")
         # print(self.P)
         # print("self.P 2 ", type(self.P), np.shape(self.P))
+        self.P = O * self.P
+        # print("self.P 3", type(self.P), np.shape(self.P))
+        # print(self.P)
+
         # self.P = np.transpose(T, (1, 2, 0)) @ self.P
 
-        self.P = O * self.P
+
         # print(self.P)
         # print(self.P)
         # print(O)
         self.P /= np.sum(self.P)
-        # print("self.P 3 ", type(self.P), np.shape(self.P))
+        # print("self.P 4 ", type(self.P), np.shape(self.P))
 
         # print(np.max(self.P))
         # print(type(self.P), np.shape(self.P))
@@ -520,16 +512,19 @@ class LocAgent:
             # print('nawrotka 1')
             self.nawrotka = True
             action = 'turnleft'
+            self.prev_action = action
             return action
 
         if self.nawrotka == True:
             # print('nawrotka 2')
             self.nawrotka = False
             action = 'turnleft'
+            self.prev_action = action
             return action
 
         if percept == [ 'right', 'bckwd', 'left']:
             action = 'forward'
+            self.prev_action = action
             return action
 
         if 'fwd' in percept:
@@ -539,19 +534,21 @@ class LocAgent:
                 action = 'turnleft'
             if self.prev_action == 'turnright':
                 action = 'turnright'
+            self.prev_action = action
             return action
 
         if percept == [ 'right']  or percept == ['fwd', 'right'] :
             action = np.random.choice(['turnleft', 'forward'], 1, p=[0.5, 0.5])
+            self.prev_action = action
             return action
 
         if percept == ['left'] or percept == ['fwd', 'left']:
             action = np.random.choice(['turnright', 'forward'], 1, p=[0.5, 0.5])
+            self.prev_action = action
             return action
 
 
         self.prev_action = action
-
         return action
 
     def getPosterior(self):
