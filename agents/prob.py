@@ -26,40 +26,28 @@ class LocAgent:
     def __init__(self, size, walls, eps_perc, eps_move):
         self.size = size
         self.walls = walls
-        # list of valid locations
 
-        # tutaj trzeba wrzucic orientacje
         dir_to_idx = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
-        #
+
         self.locations = list({*locations(self.size)}.difference(self.walls))
         self.loc_with_orientation = []
         for i in self.locations:
             for idx2 in dir_to_idx.values():
                 new = (i[0], i[1],idx2)
                 self.loc_with_orientation.append(new)
-                # print(new)
 
-        # print(len(loc_with_orientation))
-        # print(self.loc_with_orientation)
-        # print("self.locations ",type(self.locations), np.shape(self.locations))
-        # print(len(self.locations))
-        # print(self.locations)
 
         # dictionary from location to its index in the list
         self.loc_to_idx = {loc: idx for idx, loc in enumerate(self.locations)}
         self.loc_with_orientation_to_idx = {loc: idx for idx, loc in enumerate(self.loc_with_orientation)}
-        # print(self.loc_to_idx)
-        # print(self.loc_with_orientation_to_idx)
 
         self.eps_perc = eps_perc
         self.eps_move = eps_move
 
-        # previous action
         self.prev_action = None
 
         self.t = 0
         prob = 1.0 / len(self.loc_with_orientation)
-        # prob = 1.0 / len(self.locations)
         # P - macierz z prawdopodobienstwami dla kazdego pola
         self.P = prob * np.ones([len(self.locations)], dtype=np.float)
         # print(self.P, np.shape(self.P))
@@ -68,8 +56,6 @@ class LocAgent:
                           [self.P],
                           [self.P]])
 
-        # print(np.shape(self.P))
-        # self.P = np.transpose(self.P, (0, 1, 2))
         self.P = np.transpose(self.P, (0, 2, 1))
         self.O_prev = np.zeros([len(self.locations), 4, 4], dtype=np.float)
         self.next_action = 'fwd'
@@ -108,9 +94,11 @@ class LocAgent:
                     # jezeli robot sie obrocil to zmienia sie wartosci w percept
                     if self.prev_percept != percept:
                         T[index,index, index2] = 1.0 - self.eps_move
+                        # T[index, index, index2] = 1.0
                         # prawdopodobienstwo ze sie nie obroci
                     else:
                         T[index,index, index2] = self.eps_move
+                        # T[index, index, index2] = 1.0
 
         # jezeli poprzednia akcja byl skret w LEWO
         if self.prev_action == 'turnleft':
@@ -121,9 +109,11 @@ class LocAgent:
                     # jezeli robot sie obrocil to zmienia sie wartosci w percept
                     if self.prev_percept != percept:
                         T[index,index, index2] = 1.0 - self.eps_move
+                        # T[index, index, index2] = 1.0
                         # prawdopodobienstwo ze sie nie obroci
                     else:
                         T[index,index, index2] = self.eps_move
+                        # T[index, index, index2] = 1.0
 
         # jezeli poprzednia akcja jest rowna None (poczatek!)
         if self.prev_action == None:
@@ -153,6 +143,8 @@ class LocAgent:
                             d = 'N'
                             nh_loc = nextLoc((loc[0], loc[1]), d)
                             obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                            # obstale False - nie ma przeszkody
+                            # obstale True - jest przeszkoda
                             if obstale == True:
                                 prob *= (1 - self.eps_perc)
                             else:
@@ -217,7 +209,7 @@ class LocAgent:
                             else:
                                 prob *= self.eps_perc
 
-                    prob = round(prob, 4)
+                    prob = round(prob, 5)
                     O[index, 0, i] = prob
 
                 # grot prawo
@@ -296,7 +288,7 @@ class LocAgent:
                             else:
                                 prob *= self.eps_perc
 
-                    prob = round(prob, 4)
+                    prob = round(prob, 5)
                     O[index, 0, i] = prob
 
                 # grot dol
@@ -372,7 +364,7 @@ class LocAgent:
                             else:
                                 prob *= self.eps_perc
 
-                    prob = round(prob, 4)
+                    prob = round(prob, 5)
                     O[index, 0, i] = prob
 
                 # grot lewo
@@ -463,23 +455,26 @@ class LocAgent:
             self.O_prev = O
 
 
-        # self.t += 1
-
         T = np.transpose(T, (2, 1, 0))
-
         O = np.transpose(O, (2, 0, 1))
 
-        print("self.P 1", type(self.P), np.shape(self.P))
+        # for x in range(np.shape(T)[0]):
+        #     for y in range(np.shape(T)[2]):
+        #         for z in range(np.shape(T)[1]):
+        #             print(T[x,z,y], end=' ')
+        #         print('\n')
+        #     break
+        #     print('\n')
 
-        print("T", type(T), np.shape(T))
-        # print(T)
-        print("O", type(O), np.shape(O))
-        print(O)
+        # print("self.P 1", type(self.P), np.shape(self.P))
+
+        # print("T", type(T), np.shape(T))
+
+        # print("O", type(O), np.shape(O))
+        # print(O)
         self.P = T @ self.P
 
-
-        # print(self.P)
-        print("self.P 2 ", type(self.P), np.shape(self.P))
+        # print("self.P 2 ", type(self.P), np.shape(self.P))
 
         # for i in range(4):
         #     for idx in range(42):
@@ -487,7 +482,7 @@ class LocAgent:
 
         self.P = O * self.P
 
-        print("self.P 3", type(self.P), np.shape(self.P))
+        # print("self.P 3", type(self.P), np.shape(self.P))
 
         self.P /= np.sum(self.P)
         # print("self.P 4 ", type(self.P), np.shape(self.P))
@@ -517,7 +512,6 @@ class LocAgent:
             return action
 
         if 'fwd' in percept:
-            # higher chance of turning left to avoid getting stuck in one location
             action = np.random.choice(['turnleft', 'turnright'], 1, p=[0.5, 0.5])
             if self.prev_action == 'turnleft':
                 action = 'turnleft'
@@ -543,7 +537,7 @@ class LocAgent:
     def getPosterior(self):
         # directions in order 'N', 'E', 'S', 'W'
         P_arr = np.zeros([self.size, self.size, 4], dtype=np.float)
-        print("self.P 5 ", type(self.P), np.shape(self.P))
+
         # TODO PUT YOUR CODE HERE
 
         for index2 in range(4):
