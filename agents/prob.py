@@ -110,7 +110,7 @@ class LocAgent:
                         T[index,index, index2] = 1.0 - self.eps_move
                         # prawdopodobienstwo ze sie nie obroci
                     else:
-                        T[index,index, index2-1] = self.eps_move
+                        T[index,index, index2] = self.eps_move
 
         # jezeli poprzednia akcja byl skret w LEWO
         if self.prev_action == 'turnleft':
@@ -123,7 +123,7 @@ class LocAgent:
                         T[index,index, index2] = 1.0 - self.eps_move
                         # prawdopodobienstwo ze sie nie obroci
                     else:
-                        T[index,index, index2-1] = self.eps_move
+                        T[index,index, index2] = self.eps_move
 
         # jezeli poprzednia akcja jest rowna None (poczatek!)
         if self.prev_action == None:
@@ -133,7 +133,7 @@ class LocAgent:
                     # prawdopodobienstwo ze sie obroci
                     T[index, index, index2] = 1.0
 
-
+        # macierz sensora
         O = np.zeros([len(self.locations), 1, 4], dtype=np.float)
         per = percept
         for idx, p in enumerate(per):
@@ -472,7 +472,9 @@ class LocAgent:
         print("self.P 1", type(self.P), np.shape(self.P))
 
         print("T", type(T), np.shape(T))
+        # print(T)
         print("O", type(O), np.shape(O))
+        print(O)
         self.P = T @ self.P
 
 
