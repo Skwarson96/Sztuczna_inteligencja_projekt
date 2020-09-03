@@ -65,13 +65,13 @@ class LocAgent:
     def __call__(self, percept):
         # update posterior
         # TODO PUT YOUR CODE HERE
-        # T = np.zeros([len(self.locations), len(self.locations)], dtype=np.float)
+
         T = np.zeros([len(self.locations), len(self.locations), 4], dtype=np.float)
         # print("  macierz T   ", type(T), np.shape(T))
+
         dir_to_idx = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
         # jezeli poprzednia akcja byl krok PROSTO
         if self.prev_action == 'forward':
-            # print("test forward")
             for index2, direction in enumerate(dir_to_idx.keys()):
                 for index, loc in enumerate(self.locations):
                     next_loc = nextLoc((loc[0], loc[1]), direction)
@@ -85,55 +85,96 @@ class LocAgent:
                     else:
                         T[index,index, index2] = 1.0
 
-        # jezeli poprzednia akcja byl skret w PRAWO
-        if self.prev_action == 'turnright':
-            # print("test turnright")
+        # jezeli poprzednia akcja byl skret w PRAWO lub LEWO
+        if self.prev_action == 'turnright' or self.prev_action == 'turnleft':
             for index2, direction in enumerate(dir_to_idx.keys()):
                 for index, loc in enumerate(self.locations):
                     # prawdopodobienstwo ze sie obroci
                     # jezeli robot sie obrocil to zmienia sie wartosci w percept
                     if self.prev_percept != percept:
-                        T[index,index, index2] = 1.0 - self.eps_move
-                        # T[index, index, index2] = 1.0
+                        # T[index,index, index2] = 1.0 - self.eps_move
+                        T[index, index, index2] = 1.0
                         # prawdopodobienstwo ze sie nie obroci
                     else:
-                        T[index,index, index2] = self.eps_move
-                        # T[index, index, index2] = 1.0
+                        # T[index,index, index2] = self.eps_move
+                        T[index, index, index2] = 1.0
 
-        # jezeli poprzednia akcja byl skret w LEWO
-        if self.prev_action == 'turnleft':
-            # print("test turnleft")
-            for index2, direction in enumerate(dir_to_idx.keys()):
-                for index, loc in enumerate(self.locations):
-                    # prawdopodobienstwo ze sie obroci
-                    # jezeli robot sie obrocil to zmienia sie wartosci w percept
-                    if self.prev_percept != percept:
-                        T[index,index, index2] = 1.0 - self.eps_move
-                        # T[index, index, index2] = 1.0
-                        # prawdopodobienstwo ze sie nie obroci
-                    else:
-                        T[index,index, index2] = self.eps_move
-                        # T[index, index, index2] = 1.0
+        # JEZELI W PERCEPT JEST BUMP TO MACIERZ TRANZYCJI TO SAME ZERA Z JEDNA JEDYNKA
+
 
         # jezeli poprzednia akcja jest rowna None (poczatek!)
         if self.prev_action == None:
-            # print("test None")
             for index2, direction in enumerate(dir_to_idx.keys()):
                 for index, loc in enumerate(self.locations):
-                    # prawdopodobienstwo ze sie obroci
                     T[index, index, index2] = 1.0
+
+
+
 
         # macierz sensora
         O = np.zeros([len(self.locations), 1, 4], dtype=np.float)
-        per = percept
-        for idx, p in enumerate(per):
-            if p == 'bump':
-                del per[idx]
 
+
+        # dla kazdej lokacji
         for index, loc in enumerate(self.locations):
-            # print(loc)
-            # prob = 1.0
-            for i in range(4):
+            # dla kazdego kierunku swiata
+            for dir_index, dir in enumerate(['N', 'E', 'S', 'W']):
+                prob = 1.0
+                # sprawdz czy rozwazana lokalizacja w tym kierunku jest przeszkoda
+                nh_loc = nextLoc((loc[0], loc[1]), dir)
+                print( loc, dir, nh_loc)
+                obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                # obstale False - nie ma przeszkody
+                # obstale True - jest przeszkoda
+
+                # dla kazdego kierunku z sensor_dir
+                for idx, per in enumerate(['fwd', 'right', 'bckwd', 'left']):
+                    # print(idx, per)
+                    # print(sensor_dir[dir_index])
+                    # jezeli (jest/nie ma) przeszkody i w percept (znajduje/nie znajduje) sie dany kierunek to:
+                    # print(per, percept)
+                    if obstale == (per in percept):
+                        # print("test")
+                        print(per, percept, 1 - self.eps_perc)
+                        prob *= (1 - self.eps_perc)
+                    else:
+                        print(per, percept, self.eps_perc)
+                        prob *= self.eps_perc
+
+                    # if per in percept:
+                    #     # jezeli jest przeszkoda, to sie wszystko zgadza i pomnoz razy 0.9
+                    #     if obstale == True:
+                    #         # print('1 w kierunku',per,  dir,'Jest przeszkoda')
+                    #         prob *= (1 - self.eps_perc)
+                    #         print(1 - self.eps_perc)
+                    #     # jezeli przeszkody nie ma to sensor klamie i pomnoz razy 0.1
+                    #     else:
+                    #         # print('2 w kierunku',per,  dir,"Nie ma przeszkody")
+                    #         prob *= self.eps_perc
+                    #         print(self.eps_perc)
+                    # # jezeli w percept nie ma danego kierunku to:
+                    # else:
+                    #     # jezeli jest przeszkoda, to znaczy ze sensor klamie, bo nie wykryl przeszkode
+                    #     if obstale == True:
+                    #         # print('3 w kierunku',per,  dir,'Jest przeszkoda')
+                    #         prob *=  self.eps_perc
+                    #         print(self.eps_perc)
+                    #     # jezeli nie ma przeszkody w tymi miejscu to wszystko sie zgadza
+                    #     else:
+                    #         # print('4 w kierunku',per,  dir, "Nie ma przeszkody")
+                    #         prob *= (1 -self.eps_perc)
+                    #         print(1 -self.eps_perc)
+                    # print(prob)
+                prob = round(prob, 5)
+                print(prob)
+                # if prob > 0.65:
+                #     print("TESTT")
+                O[index, 0, dir_index] = prob
+
+#----------------------------------------------------------------------------------------
+
+
+            '''
                 # grot gora
                 if i == 0:
                     # fwd = N
@@ -447,6 +488,8 @@ class LocAgent:
 
                     prob = round(prob, 5)
                     O[index, 0, i] = prob
+        '''
+
 
         # Gdy czujnik nic nie wykryje
         if len(percept) == 0:
@@ -455,9 +498,18 @@ class LocAgent:
             self.O_prev = O
 
 
-        T = np.transpose(T, (2, 1, 0))
-        O = np.transpose(O, (2, 0, 1))
+        # np.save('data/T_%02d_%02d.npy' % (self.t, self.t + 1), T)
+        # print("  macierz T   ", type(T), np.shape(T))
+        # print(T)
 
+        # T = np.transpose(T, (2, 1, 0))
+
+        # print("  macierz T   ", type(T), np.shape(T))
+        # print(T)
+
+        # print("  macierz O   ", type(O), np.shape(O))
+
+        # print("  macierz O   ", type(O), np.shape(O))
         # for x in range(np.shape(T)[0]):
         #     for y in range(np.shape(T)[2]):
         #         for z in range(np.shape(T)[1]):
@@ -468,30 +520,44 @@ class LocAgent:
 
         # print("self.P 1", type(self.P), np.shape(self.P))
 
-        # print("T", type(T), np.shape(T))
+        #
 
         # print("O", type(O), np.shape(O))
         # print(O)
+        #
+        # print(T)
+        # print("T", np.shape(T), "self.P",np.shape(self.P))
+        T = np.transpose(T, (2, 1, 0))
+        # print("T", np.shape(T), "self.P",np.shape(self.P))
         self.P = T @ self.P
-
+        # print(T @ self.P)
         # print("self.P 2 ", type(self.P), np.shape(self.P))
 
         # for i in range(4):
         #     for idx in range(42):
         #         print(idx, O[i,idx, 0], "*", self.P[i, idx, 0], '=', round(O[i,idx, 0]*self.P[i, idx, 0], 5))
-
+        # print("O", np.shape(O), "self.P",np.shape(self.P))
+        O = np.transpose(O, (2, 0, 1))
+        # print("O", np.shape(O), "self.P",np.shape(self.P))
         self.P = O * self.P
+        # print(self.P)
 
         # print("self.P 3", type(self.P), np.shape(self.P))
+        # self.P = np.transpose(self.P, (0, 2, 1))
+        # print(self.P)
+        # print("self.P 4", type(self.P), np.shape(self.P))
+        # self.P = np.transpose(self.P, (0, 2, 1))
 
         self.P /= np.sum(self.P)
-        # print("self.P 4 ", type(self.P), np.shape(self.P))
+        # print(self.P)
 
-        # -----------------------
+        # print("self.P 5 ", type(self.P), np.shape(self.P))
 
+
+        # ------------------------------------------
         action = 'forward'
-        # TODO CHANGE THIS HEURISTICS TO SPEED UP CONVERGENCE
 
+        # HEURISTICS
         if percept == ['fwd', 'right', 'left']:
             # print('nawrotka 1')
             self.nawrotka = True
@@ -529,6 +595,8 @@ class LocAgent:
             action = np.random.choice(['turnright', 'forward'], 1, p=[0.5, 0.5])
             self.prev_action = action
             return action
+        # -----------------------------------------
+
 
         self.prev_percept = percept
         self.prev_action = action
@@ -537,7 +605,7 @@ class LocAgent:
     def getPosterior(self):
         # directions in order 'N', 'E', 'S', 'W'
         P_arr = np.zeros([self.size, self.size, 4], dtype=np.float)
-
+        # P_arr = np.transpose(P_arr, (2, 0, 1))
         # TODO PUT YOUR CODE HERE
 
         for index2 in range(4):
@@ -546,7 +614,11 @@ class LocAgent:
                 P_arr[loc[0], loc[1], index2] = self.P[index2, idx, 0]
 
         # -----------------------
+
         # print(P_arr)
+        # print(np.shape(P_arr))
+        # P_arr = np.transpose(P_arr, (2, 1, 0))
+        # print(np.shape(P_arr))
         return P_arr
 
     def forward(self, cur_loc, cur_dir):
