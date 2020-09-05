@@ -148,8 +148,72 @@ class LocAgent:
                                 prob *= (1 - self.eps_perc)
                             else:
                                 prob *= self.eps_perc
-                    else:
-                        prob *= 0
+                    if dir == 'E':
+                        if dir2 == 'N':
+                            # print("N", dir2, obstale , 'fwd' in percept)
+                            if obstale == ('left' in percept):
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+                        if dir2 == 'E':
+                            if obstale == ('fwd' in percept):
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+                        if dir2 == 'S':
+                            if obstale == ('right' in percept):
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+                        if dir2 == 'W':
+                            if obstale == ('bckwd' in percept):
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+                    if dir == 'S':
+                        if dir2 == 'N':
+                            # print("N", dir2, obstale , 'fwd' in percept)
+                            if obstale == ('bckwd' in percept):
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+                        if dir2 == 'E':
+                            if obstale == ('left' in percept):
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+                        if dir2 == 'S':
+                            if obstale == ('fwd' in percept):
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+                        if dir2 == 'W':
+                            if obstale == ('right' in percept):
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+                    if dir == 'W':
+                        if dir2 == 'N':
+                            # print("N", dir2, obstale , 'fwd' in percept)
+                            if obstale == ('right' in percept):
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+                        if dir2 == 'E':
+                            if obstale == ('bckwd' in percept):
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+                        if dir2 == 'S':
+                            if obstale == ('left' in percept):
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+                        if dir2 == 'W':
+                            if obstale == ('fwd' in percept):
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
 
                 prob = round(prob, 5)
                 O[dir_index,  0, index] = prob
@@ -555,19 +619,18 @@ class LocAgent:
         #
 
         # print("O", type(O), np.shape(O))
-        print(O)
+        # print(O)
         #
         # print(T)
         # print("T", np.shape(T), "self.P",np.shape(self.P))
 
         T = np.transpose(T, (2, 0, 1))
-
         # print(T)
 
-        # print("T", np.shape(T), "self.P",np.shape(self.P))
+        print("T", np.shape(T), "self.P 1",np.shape(self.P))
         self.P = T @ self.P
         # print(T @ self.P)
-        # print("self.P 2 ", type(self.P), np.shape(self.P))
+        print("self.P 2 ",  np.shape(self.P))
 
         # for i in range(4):
         #     for idx in range(42):
@@ -586,13 +649,14 @@ class LocAgent:
         # print(np.shape(O))
         # print('self.P', np.shape(self.P))
         # print(T)
-        # print("O", np.shape(O), "self.P",np.shape(self.P))
-
+        print("O", np.shape(O), "self.P",np.shape(self.P))
+        O = np.transpose(O, (0, 2, 1))
+        print("O", np.shape(O), "self.P",np.shape(self.P))
         self.P = O * self.P
 
         # print(self.P)
 
-        # print("self.P 3", type(self.P), np.shape(self.P))
+        print("self.P 3", type(self.P), np.shape(self.P))
         # self.P = np.transpose(self.P, (0, 2, 1))
         # print(self.P)
         # print("self.P 4", type(self.P), np.shape(self.P))
