@@ -28,7 +28,6 @@ class LocAgent:
         self.walls = walls
 
         dir_to_idx = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
-
         self.locations = list({*locations(self.size)}.difference(self.walls))
         self.loc_with_orientation = []
         for i in self.locations:
@@ -112,66 +111,95 @@ class LocAgent:
 
 
         # macierz sensora
-        O = np.zeros([len(self.locations), 1, 4], dtype=np.float)
-
-
+        O = np.zeros([4, 1, len(self.locations)], dtype=np.float)
+        sensor_dir = ['fwd', 'right', 'bckwd', 'left']
         # dla kazdej lokacji
         for index, loc in enumerate(self.locations):
             # dla kazdego kierunku swiata
             for dir_index, dir in enumerate(['N', 'E', 'S', 'W']):
                 prob = 1.0
-                # sprawdz czy rozwazana lokalizacja w tym kierunku jest przeszkoda
-                nh_loc = nextLoc((loc[0], loc[1]), dir)
-                print( loc, dir, nh_loc)
-                obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                # obstale False - nie ma przeszkody
-                # obstale True - jest przeszkoda
-
-                # dla kazdego kierunku z sensor_dir
-                for idx, per in enumerate(['fwd', 'right', 'bckwd', 'left']):
-                    # print(idx, per)
-                    # print(sensor_dir[dir_index])
-                    # jezeli (jest/nie ma) przeszkody i w percept (znajduje/nie znajduje) sie dany kierunek to:
-                    # print(per, percept)
-                    if obstale == (per in percept):
-                        # print("test")
-                        print(per, percept, 1 - self.eps_perc)
-                        prob *= (1 - self.eps_perc)
+                for dir_index2, dir2 in enumerate(['N', 'E', 'S', 'W']):
+                    # sprawdz czy rozwazana lokalizacja w tym kierunku jest przeszkoda
+                    nh_loc = nextLoc((loc[0], loc[1]), dir2)
+                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                    # obstale False - nie ma przeszkody
+                    # obstale True - jest przeszkoda
+                    # print( loc, dir, dir2, nh_loc, obstale)
+                    # print(percept)
+                    if dir == 'N':
+                        if dir2 == 'N':
+                            # print("N", dir2, obstale , 'fwd' in percept)
+                            if obstale == ('fwd' in percept):
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+                        if dir2 == 'E':
+                            if obstale == ('right' in percept):
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+                        if dir2 == 'S':
+                            if obstale == ('bckwd' in percept):
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
+                        if dir2 == 'W':
+                            if obstale == ('left' in percept):
+                                prob *= (1 - self.eps_perc)
+                            else:
+                                prob *= self.eps_perc
                     else:
-                        print(per, percept, self.eps_perc)
-                        prob *= self.eps_perc
+                        prob *= 0
 
-                    # if per in percept:
-                    #     # jezeli jest przeszkoda, to sie wszystko zgadza i pomnoz razy 0.9
-                    #     if obstale == True:
-                    #         # print('1 w kierunku',per,  dir,'Jest przeszkoda')
-                    #         prob *= (1 - self.eps_perc)
-                    #         print(1 - self.eps_perc)
-                    #     # jezeli przeszkody nie ma to sensor klamie i pomnoz razy 0.1
-                    #     else:
-                    #         # print('2 w kierunku',per,  dir,"Nie ma przeszkody")
-                    #         prob *= self.eps_perc
-                    #         print(self.eps_perc)
-                    # # jezeli w percept nie ma danego kierunku to:
-                    # else:
-                    #     # jezeli jest przeszkoda, to znaczy ze sensor klamie, bo nie wykryl przeszkode
-                    #     if obstale == True:
-                    #         # print('3 w kierunku',per,  dir,'Jest przeszkoda')
-                    #         prob *=  self.eps_perc
-                    #         print(self.eps_perc)
-                    #     # jezeli nie ma przeszkody w tymi miejscu to wszystko sie zgadza
-                    #     else:
-                    #         # print('4 w kierunku',per,  dir, "Nie ma przeszkody")
-                    #         prob *= (1 -self.eps_perc)
-                    #         print(1 -self.eps_perc)
-                    # print(prob)
                 prob = round(prob, 5)
-                print(prob)
-                # if prob > 0.65:
-                #     print("TESTT")
-                O[index, 0, dir_index] = prob
+                O[dir_index,  0, index] = prob
+
+
+
+                    # for idx, per in enumerate(['fwd', 'right', 'bckwd', 'left']):
+                    #     # print(idx, per)
+                    #     # print(sensor_dir[dir_index])
+                    #     # jezeli (jest/nie ma) przeszkody i w percept (znajduje/nie znajduje) sie dany kierunek to:
+                    #     print(loc, dir, nh_loc, obstale, (per in percept), per, percept)
+                    #     if obstale == (per in percept):
+                    #         # print("test")
+                    #         # print(per, percept, 1 - self.eps_perc)
+                    #         prob *= (1 - self.eps_perc)
+                    #     else:
+                    #         # print(per, percept, self.eps_perc)
+                    #         prob *= self.eps_perc
+
+
+
+
+                        # if per in percept:
+                        #     # jezeli jest przeszkoda, to sie wszystko zgadza i pomnoz razy 0.9
+                        #     if obstale == True:
+                        #         # print('1 w kierunku',per,  dir,'Jest przeszkoda')
+                        #         prob *= (1 - self.eps_perc)
+                        #         print(1 - self.eps_perc)
+                        #     # jezeli przeszkody nie ma to sensor klamie i pomnoz razy 0.1
+                        #     else:
+                        #         # print('2 w kierunku',per,  dir,"Nie ma przeszkody")
+                        #         prob *= self.eps_perc
+                        #         print(self.eps_perc)
+                        # # jezeli w percept nie ma danego kierunku to:
+                        # else:
+                        #     # jezeli jest przeszkoda, to znaczy ze sensor klamie, bo nie wykryl przeszkode
+                        #     if obstale == True:
+                        #         # print('3 w kierunku',per,  dir,'Jest przeszkoda')
+                        #         prob *=  self.eps_perc
+                        #         print(self.eps_perc)
+                        #     # jezeli nie ma przeszkody w tymi miejscu to wszystko sie zgadza
+                        #     else:
+                        #         # print('4 w kierunku',per,  dir, "Nie ma przeszkody")
+                        #         prob *= (1 -self.eps_perc)
+                        #         print(1 -self.eps_perc)
+                        # print(prob)
+
 
 #----------------------------------------------------------------------------------------
+
 
 
             '''
@@ -490,7 +518,11 @@ class LocAgent:
                     O[index, 0, i] = prob
         '''
 
+        # data = np.load('O_01.npy')
+        # print(data)
+        # print(np.shape(data))
 
+        # print(O)
         # Gdy czujnik nic nie wykryje
         if len(percept) == 0:
             O = self.O_prev
@@ -498,7 +530,7 @@ class LocAgent:
             self.O_prev = O
 
 
-        # np.save('data/T_%02d_%02d.npy' % (self.t, self.t + 1), T)
+
         # print("  macierz T   ", type(T), np.shape(T))
         # print(T)
 
@@ -523,11 +555,15 @@ class LocAgent:
         #
 
         # print("O", type(O), np.shape(O))
-        # print(O)
+        print(O)
         #
         # print(T)
         # print("T", np.shape(T), "self.P",np.shape(self.P))
-        T = np.transpose(T, (2, 1, 0))
+
+        T = np.transpose(T, (2, 0, 1))
+
+        # print(T)
+
         # print("T", np.shape(T), "self.P",np.shape(self.P))
         self.P = T @ self.P
         # print(T @ self.P)
@@ -537,9 +573,23 @@ class LocAgent:
         #     for idx in range(42):
         #         print(idx, O[i,idx, 0], "*", self.P[i, idx, 0], '=', round(O[i,idx, 0]*self.P[i, idx, 0], 5))
         # print("O", np.shape(O), "self.P",np.shape(self.P))
-        O = np.transpose(O, (2, 0, 1))
+
+
+        # O_test = O
+        # O_test = np.transpose(O_test, (2, 1, 0))
+        # print(O_test)
+        # print(np.shape(O_test))
+
+        # print(np.shape(O))
+        # print(O)
+        # O = np.transpose(O, (2, 0, 1))
+        # print(np.shape(O))
+        # print('self.P', np.shape(self.P))
+        # print(T)
         # print("O", np.shape(O), "self.P",np.shape(self.P))
+
         self.P = O * self.P
+
         # print(self.P)
 
         # print("self.P 3", type(self.P), np.shape(self.P))
