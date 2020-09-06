@@ -38,7 +38,7 @@ class LocAgent:
 
         # dictionary from location to its index in the list
         self.loc_to_idx = {loc: idx for idx, loc in enumerate(self.locations)}
-        self.loc_with_orientation_to_idx = {loc: idx for idx, loc in enumerate(self.loc_with_orientation)}
+        # self.loc_with_orientation_to_idx = {loc: idx for idx, loc in enumerate(self.loc_with_orientation)}
 
         self.eps_perc = eps_perc
         self.eps_move = eps_move
@@ -60,54 +60,53 @@ class LocAgent:
         self.next_action = 'fwd'
         self.nawrotka = False
         self.prev_percept = []
-
+        self.T_prev = None
     def __call__(self, percept):
-        # update posterior
+
         # TODO PUT YOUR CODE HERE
 
-        T = np.zeros([len(self.locations), len(self.locations), 4], dtype=np.float)
-        # print("  macierz T   ", type(T), np.shape(T))
 
-        dir_to_idx = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
+        # macierz tranzcji
+        T = np.zeros([4, len(self.locations), len(self.locations)], dtype=np.float)
+        # print("  macierz T   ", type(T), np.shape(T))
+        print(self.loc_to_idx)
         # jezeli poprzednia akcja byl krok PROSTO
         if self.prev_action == 'forward':
-            for index2, direction in enumerate(dir_to_idx.keys()):
+            for dir_index, direction in enumerate(['N', 'E', 'S', 'W']):
                 for index, loc in enumerate(self.locations):
                     next_loc = nextLoc((loc[0], loc[1]), direction)
+                    print(loc, direction, next_loc)
                     if legalLoc((next_loc[0], next_loc[1]), self.size) and ((next_loc[0], next_loc[1]) not in self.walls):
                         next_index = self.loc_to_idx[next_loc]
                         # prawdopodobienstwo ze sie ruszy z miejsca
-                        T[index, next_index, index2] = 1.0 - self.eps_move
+                        T[dir_index, index, next_index] = 1.0 - self.eps_move
                         # prawdopodobienstwo ze zostanie na tym samym miejscu
-                        T[index,index, index2] = self.eps_move
-                    # jezeli trafi na przeszkode to zostaje w tym samym miejscu
+                        T[dir_index, index,index] = self.eps_move
                     else:
-                        T[index,index, index2] = 1.0
+                        T[dir_index, index,index] = 1.0
 
         # jezeli poprzednia akcja byl skret w PRAWO lub LEWO
         if self.prev_action == 'turnright' or self.prev_action == 'turnleft':
-            for index2, direction in enumerate(dir_to_idx.keys()):
+            for dir_index, direction in enumerate(['N', 'E', 'S', 'W']):
                 for index, loc in enumerate(self.locations):
                     # prawdopodobienstwo ze sie obroci
                     # jezeli robot sie obrocil to zmienia sie wartosci w percept
                     if self.prev_percept != percept:
                         # T[index,index, index2] = 1.0 - self.eps_move
-                        T[index, index, index2] = 1.0
+                        T[dir_index, index, index] = 1.0
                         # prawdopodobienstwo ze sie nie obroci
                     else:
                         # T[index,index, index2] = self.eps_move
-                        T[index, index, index2] = 1.0
+                        T[dir_index, index, index] = 1.0
 
         # JEZELI W PERCEPT JEST BUMP TO MACIERZ TRANZYCJI TO SAME ZERA Z JEDNA JEDYNKA
 
 
         # jezeli poprzednia akcja jest rowna None (poczatek!)
         if self.prev_action == None:
-            for index2, direction in enumerate(dir_to_idx.keys()):
+            for dir_index, direction in enumerate(['N', 'E', 'S', 'W']):
                 for index, loc in enumerate(self.locations):
-                    T[index, index, index2] = 1.0
-
-        # print(T)
+                    T[dir_index, index, index, ] = 1.0
 
 
         # macierz sensora
@@ -239,7 +238,7 @@ class LocAgent:
 
                 prob = round(prob, 5)
                 O[dir_index, 0, index] = prob
-                print(loc, dir, prob, percept)
+                # print(loc, dir, prob, percept)
 
 
             # for dir_index, dir in enumerate(world_dir):
@@ -278,10 +277,10 @@ class LocAgent:
             #         O[dir_index, 0, index] = prob
             #         print(loc, dir, prob, percept)
 #----------------------------------------------------------------------------------------
-        print(O)
-        data = np.load('P_02.npy')
+        # print(O)
+
+        # data = np.load('T_04_05.npy')
         # print(data)
-        # print(np.shape(data))
 
         # print(O)
         # Gdy czujnik nic nie wykryje
@@ -291,7 +290,13 @@ class LocAgent:
             self.O_prev = O
 
         # print("T", np.shape(T),"self.P", np.shape(self.P))
-        T = np.transpose(T, (2, 0, 1))
+        # print(T)
+        # T = np.transpose(T, (2, 0, 1))
+        # comparison = self.T_prev == T
+        # equal_arrays = comparison.all()
+        # print(equal_arrays)
+        # print(T)
+        self.T_prev = T
         # print("T", np.shape(T),"self.P", np.shape(self.P))
         self.P = T @ self.P
         # print("O", np.shape(O),"self.P", np.shape(self.P))
