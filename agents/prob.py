@@ -54,7 +54,7 @@ class LocAgent:
                           [self.P],
                           [self.P],
                           [self.P]])
-
+        self.test_P = None
         self.P = np.transpose(self.P, (0, 2, 1))
         self.O_prev = np.zeros([len(self.locations), 4, 4], dtype=np.float)
         self.next_action = 'fwd'
@@ -107,130 +107,206 @@ class LocAgent:
                 for index, loc in enumerate(self.locations):
                     T[index, index, index2] = 1.0
 
+        # print(T)
+
+
         # macierz sensora
         O = np.zeros([4, 1, len(self.locations)], dtype=np.float)
         world_dir = ['N', 'E', 'S', 'W']
-        sensor_dir = ['fwd', 'right', 'bckwd', 'left']
         # dla kazdej lokacji
         for index, loc in enumerate(self.locations):
             # dla kazdego kierunku swiata
             for dir_index, dir in enumerate(world_dir):
                 prob = 1.0
-                for dir_index2, dir2 in enumerate(['N', 'E', 'S', 'W']):
-                    # sprawdz czy rozwazana lokalizacja w tym kierunku jest przeszkoda
-                    nh_loc = nextLoc((loc[0], loc[1]), dir2)
+                # for sensor_dir in ['fwd', 'right', 'bckwd', 'left']:
+                if dir == 'N':
+                    nh_loc = nextLoc((loc[0], loc[1]), 'N')
                     obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                    if dir2 == world_dir[dir_index2]:
-                        # print("N", dir2, obstale , 'fwd' in percept)
-                        if obstale == ('fwd' in percept):
-                            prob *= (1 - self.eps_perc)
-                        else:
-                            prob *= self.eps_perc
-                    if dir2 == world_dir[dir_index2-3]:
-                        if obstale == ('right' in percept):
-                            prob *= (1 - self.eps_perc)
-                        else:
-                            prob *= self.eps_perc
-                    if dir2 == world_dir[dir_index2-2]:
-                        if obstale == ('bckwd' in percept):
-                            prob *= (1 - self.eps_perc)
-                        else:
-                            prob *= self.eps_perc
-                    if dir2 == world_dir[dir_index2-1]:
-                        if obstale == ('left' in percept):
-                            prob *= (1 - self.eps_perc)
-                        else:
-                            prob *= self.eps_perc
+                    if obstale == ('fwd' in percept):
+                        prob *= (1 - self.eps_perc)
+                    else:
+                        prob *= self.eps_perc
 
-                    prob = round(prob, 5)
-                    O[dir_index, 0, index] = prob
+                    nh_loc = nextLoc((loc[0], loc[1]), 'E')
+                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                    if obstale == ('right' in percept):
+                        prob *= (1 - self.eps_perc)
+                    else:
+                        prob *= self.eps_perc
+
+                    nh_loc = nextLoc((loc[0], loc[1]), 'S')
+                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                    if obstale == ('bckwd' in percept):
+                        prob *= (1 - self.eps_perc)
+                    else:
+                        prob *= self.eps_perc
+
+                    nh_loc = nextLoc((loc[0], loc[1]), 'W')
+                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                    if obstale == ('left' in percept):
+                        prob *= (1 - self.eps_perc)
+                    else:
+                        prob *= self.eps_perc
+
+                if dir == 'E':
+                    nh_loc = nextLoc((loc[0], loc[1]), 'E')
+                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                    if obstale == ('fwd' in percept):
+                        prob *= (1 - self.eps_perc)
+                    else:
+                        prob *= self.eps_perc
+
+                    nh_loc = nextLoc((loc[0], loc[1]), 'S')
+                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                    if obstale == ('right' in percept):
+                        prob *= (1 - self.eps_perc)
+                    else:
+                        prob *= self.eps_perc
+
+                    nh_loc = nextLoc((loc[0], loc[1]), 'W')
+                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                    if obstale == ('bckwd' in percept):
+                        prob *= (1 - self.eps_perc)
+                    else:
+                        prob *= self.eps_perc
+
+                    nh_loc = nextLoc((loc[0], loc[1]), 'N')
+                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                    if obstale == ('left' in percept):
+                        prob *= (1 - self.eps_perc)
+                    else:
+                        prob *= self.eps_perc
+
+                if dir == 'S':
+                    nh_loc = nextLoc((loc[0], loc[1]), 'S')
+                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                    if obstale == ('fwd' in percept):
+                        prob *= (1 - self.eps_perc)
+                    else:
+                        prob *= self.eps_perc
+
+                    nh_loc = nextLoc((loc[0], loc[1]), 'W')
+                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                    if obstale == ('right' in percept):
+                        prob *= (1 - self.eps_perc)
+                    else:
+                        prob *= self.eps_perc
+
+                    nh_loc = nextLoc((loc[0], loc[1]), 'N')
+                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                    if obstale == ('bckwd' in percept):
+                        prob *= (1 - self.eps_perc)
+                    else:
+                        prob *= self.eps_perc
+
+                    nh_loc = nextLoc((loc[0], loc[1]), 'E')
+                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                    if obstale == ('left' in percept):
+                        prob *= (1 - self.eps_perc)
+                    else:
+                        prob *= self.eps_perc
+
+                if dir == 'W':
+                    nh_loc = nextLoc((loc[0], loc[1]), 'W')
+                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                    if obstale == ('fwd' in percept):
+                        prob *= (1 - self.eps_perc)
+                    else:
+                        prob *= self.eps_perc
+
+                    nh_loc = nextLoc((loc[0], loc[1]), 'N')
+                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                    if obstale == ('right' in percept):
+                        prob *= (1 - self.eps_perc)
+                    else:
+                        prob *= self.eps_perc
+
+                    nh_loc = nextLoc((loc[0], loc[1]), 'E')
+                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                    if obstale == ('bckwd' in percept):
+                        prob *= (1 - self.eps_perc)
+                    else:
+                        prob *= self.eps_perc
+
+                    nh_loc = nextLoc((loc[0], loc[1]), 'S')
+                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                    if obstale == ('left' in percept):
+                        prob *= (1 - self.eps_perc)
+                    else:
+                        prob *= self.eps_perc
+
+
+
+                prob = round(prob, 5)
+                O[dir_index, 0, index] = prob
+                print(loc, dir, prob, percept)
+
+
+            # for dir_index, dir in enumerate(world_dir):
+            #     prob = 1.0
+            #     for dir_index2, dir2 in enumerate(['N', 'E', 'S', 'W']):
+            #         # sprawdz czy rozwazana lokalizacja w tym kierunku jest przeszkoda
+            #         nh_loc = nextLoc((loc[0], loc[1]), dir2)
+            #         obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+            #         if dir2 == 'N':
+            #             # print("N", dir2, obstale , 'fwd' in percept)
+            #             print(dir2, 'fwd')
+            #             if obstale == ('fwd' in percept):
+            #                 prob *= (1 - self.eps_perc)
+            #             else:
+            #                 prob *= self.eps_perc
+            #         if dir2 == "E":
+            #             print(dir2, 'right')
+            #             if obstale == ('right' in percept):
+            #                 prob *= (1 - self.eps_perc)
+            #             else:
+            #                 prob *= self.eps_perc
+            #         if dir2 == "S":
+            #             print(dir2, 'bckwd')
+            #             if obstale == ('bckwd' in percept):
+            #                 prob *= (1 - self.eps_perc)
+            #             else:
+            #                 prob *= self.eps_perc
+            #         if dir2 == "W":
+            #             print(dir2, 'left')
+            #             if obstale == ('left' in percept):
+            #                 prob *= (1 - self.eps_perc)
+            #             else:
+            #                 prob *= self.eps_perc
+            #
+            #         prob = round(prob, 5)
+            #         O[dir_index, 0, index] = prob
+            #         print(loc, dir, prob, percept)
 #----------------------------------------------------------------------------------------
-
-        # data = np.load('O_01.npy')
+        print(O)
+        data = np.load('P_02.npy')
         # print(data)
         # print(np.shape(data))
 
-        print(O)
+        # print(O)
         # Gdy czujnik nic nie wykryje
         if len(percept) == 0:
             O = self.O_prev
         else:
             self.O_prev = O
 
-
-
-        # print("  macierz T   ", type(T), np.shape(T))
-        # print(T)
-
-        # T = np.transpose(T, (2, 1, 0))
-
-        # print("  macierz T   ", type(T), np.shape(T))
-        # print(T)
-
-        # print("  macierz O   ", type(O), np.shape(O))
-
-        # print("  macierz O   ", type(O), np.shape(O))
-        # for x in range(np.shape(T)[0]):
-        #     for y in range(np.shape(T)[2]):
-        #         for z in range(np.shape(T)[1]):
-        #             print(T[x,z,y], end=' ')
-        #         print('\n')
-        #     break
-        #     print('\n')
-
-        # print("self.P 1", type(self.P), np.shape(self.P))
-
-        #
-
-        # print("O", type(O), np.shape(O))
-        # print(O)
-        #
-        # print(T)
-        # print("T", np.shape(T), "self.P",np.shape(self.P))
-
+        # print("T", np.shape(T),"self.P", np.shape(self.P))
         T = np.transpose(T, (2, 0, 1))
-        # print(T)
-
-        print("T", np.shape(T), "self.P 1",np.shape(self.P))
+        # print("T", np.shape(T),"self.P", np.shape(self.P))
         self.P = T @ self.P
-        # print(T @ self.P)
-        print("self.P 2 ",  np.shape(self.P))
-
-        # for i in range(4):
-        #     for idx in range(42):
-        #         print(idx, O[i,idx, 0], "*", self.P[i, idx, 0], '=', round(O[i,idx, 0]*self.P[i, idx, 0], 5))
-        # print("O", np.shape(O), "self.P",np.shape(self.P))
-
-
-        # O_test = O
-        # O_test = np.transpose(O_test, (2, 1, 0))
-        # print(O_test)
-        # print(np.shape(O_test))
-
-        # print(np.shape(O))
-        # print(O)
-        # O = np.transpose(O, (2, 0, 1))
-        # print(np.shape(O))
-        # print('self.P', np.shape(self.P))
-        # print(T)
-        print("O", np.shape(O), "self.P",np.shape(self.P))
+        # print("O", np.shape(O),"self.P", np.shape(self.P))
         O = np.transpose(O, (0, 2, 1))
-        print("O", np.shape(O), "self.P",np.shape(self.P))
+        # print("O", np.shape(O),"self.P", np.shape(self.P))
         self.P = O * self.P
 
         # print(self.P)
-
-        print("self.P 3", type(self.P), np.shape(self.P))
-        # self.P = np.transpose(self.P, (0, 2, 1))
-        # print(self.P)
-        # print("self.P 4", type(self.P), np.shape(self.P))
-        # self.P = np.transpose(self.P, (0, 2, 1))
-
         self.P /= np.sum(self.P)
+        # self.test_P = np.transpose(self.P, (0,2,1))
+        # print(test_P)
+        # print("self.P", np.shape(self.P))
+        # print("test_P", np.shape(self.test_P))
         # print(self.P)
-
-        # print("self.P 5 ", type(self.P), np.shape(self.P))
-
+        # print(np.shape(self.P))
 
         # ------------------------------------------
         action = 'forward'
@@ -290,7 +366,6 @@ class LocAgent:
             for idx, loc in enumerate(self.locations):
 
                 P_arr[loc[0], loc[1], index2] = self.P[index2, idx, 0]
-
         # -----------------------
 
         # print(P_arr)
