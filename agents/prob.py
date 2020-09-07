@@ -62,7 +62,7 @@ class LocAgent:
 
     def __call__(self, percept):
         # TODO PUT YOUR CODE HERE
-        
+
         # MACIERZ TRANZYCJI
         T = np.zeros([4, len(self.locations), len(self.locations)], dtype=np.float)
 
@@ -117,123 +117,35 @@ class LocAgent:
         # dla kazdej lokacji
         for index, loc in enumerate(self.locations):
             # dla kazdego kierunku swiata
-            for dir_index, dir in enumerate(world_dir):
+            for dir_index, dir in enumerate(['N', 'E', 'S', 'W']):
                 prob = 1.0
-                if dir == 'N':
-                    nh_loc = nextLoc((loc[0], loc[1]), 'N')
-                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                    if obstale == ('fwd' in percept):
-                        prob *= (1 - self.eps_perc)
-                    else:
-                        prob *= self.eps_perc
+                nh_loc = nextLoc((loc[0], loc[1]), world_dir[dir_index])
+                obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                if obstale == ('fwd' in percept):
+                    prob *= (1 - self.eps_perc)
+                else:
+                    prob *= self.eps_perc
 
-                    nh_loc = nextLoc((loc[0], loc[1]), 'E')
-                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                    if obstale == ('right' in percept):
-                        prob *= (1 - self.eps_perc)
-                    else:
-                        prob *= self.eps_perc
+                nh_loc = nextLoc((loc[0], loc[1]), world_dir[dir_index-3])
+                obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                if obstale == ('right' in percept):
+                    prob *= (1 - self.eps_perc)
+                else:
+                    prob *= self.eps_perc
 
-                    nh_loc = nextLoc((loc[0], loc[1]), 'S')
-                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                    if obstale == ('bckwd' in percept):
-                        prob *= (1 - self.eps_perc)
-                    else:
-                        prob *= self.eps_perc
+                nh_loc = nextLoc((loc[0], loc[1]), world_dir[dir_index-2])
+                obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                if obstale == ('bckwd' in percept):
+                    prob *= (1 - self.eps_perc)
+                else:
+                    prob *= self.eps_perc
 
-                    nh_loc = nextLoc((loc[0], loc[1]), 'W')
-                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                    if obstale == ('left' in percept):
-                        prob *= (1 - self.eps_perc)
-                    else:
-                        prob *= self.eps_perc
-
-                if dir == 'E':
-                    nh_loc = nextLoc((loc[0], loc[1]), 'E')
-                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                    if obstale == ('fwd' in percept):
-                        prob *= (1 - self.eps_perc)
-                    else:
-                        prob *= self.eps_perc
-
-                    nh_loc = nextLoc((loc[0], loc[1]), 'S')
-                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                    if obstale == ('right' in percept):
-                        prob *= (1 - self.eps_perc)
-                    else:
-                        prob *= self.eps_perc
-
-                    nh_loc = nextLoc((loc[0], loc[1]), 'W')
-                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                    if obstale == ('bckwd' in percept):
-                        prob *= (1 - self.eps_perc)
-                    else:
-                        prob *= self.eps_perc
-
-                    nh_loc = nextLoc((loc[0], loc[1]), 'N')
-                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                    if obstale == ('left' in percept):
-                        prob *= (1 - self.eps_perc)
-                    else:
-                        prob *= self.eps_perc
-
-                if dir == 'S':
-                    nh_loc = nextLoc((loc[0], loc[1]), 'S')
-                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                    if obstale == ('fwd' in percept):
-                        prob *= (1 - self.eps_perc)
-                    else:
-                        prob *= self.eps_perc
-
-                    nh_loc = nextLoc((loc[0], loc[1]), 'W')
-                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                    if obstale == ('right' in percept):
-                        prob *= (1 - self.eps_perc)
-                    else:
-                        prob *= self.eps_perc
-
-                    nh_loc = nextLoc((loc[0], loc[1]), 'N')
-                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                    if obstale == ('bckwd' in percept):
-                        prob *= (1 - self.eps_perc)
-                    else:
-                        prob *= self.eps_perc
-
-                    nh_loc = nextLoc((loc[0], loc[1]), 'E')
-                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                    if obstale == ('left' in percept):
-                        prob *= (1 - self.eps_perc)
-                    else:
-                        prob *= self.eps_perc
-
-                if dir == 'W':
-                    nh_loc = nextLoc((loc[0], loc[1]), 'W')
-                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                    if obstale == ('fwd' in percept):
-                        prob *= (1 - self.eps_perc)
-                    else:
-                        prob *= self.eps_perc
-
-                    nh_loc = nextLoc((loc[0], loc[1]), 'N')
-                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                    if obstale == ('right' in percept):
-                        prob *= (1 - self.eps_perc)
-                    else:
-                        prob *= self.eps_perc
-
-                    nh_loc = nextLoc((loc[0], loc[1]), 'E')
-                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                    if obstale == ('bckwd' in percept):
-                        prob *= (1 - self.eps_perc)
-                    else:
-                        prob *= self.eps_perc
-
-                    nh_loc = nextLoc((loc[0], loc[1]), 'S')
-                    obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-                    if obstale == ('left' in percept):
-                        prob *= (1 - self.eps_perc)
-                    else:
-                        prob *= self.eps_perc
+                nh_loc = nextLoc((loc[0], loc[1]), world_dir[dir_index-1])
+                obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
+                if obstale == ('left' in percept):
+                    prob *= (1 - self.eps_perc)
+                else:
+                    prob *= self.eps_perc
 
                 prob = round(prob, 5)
                 O[dir_index, 0, index] = prob
