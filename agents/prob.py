@@ -47,14 +47,11 @@ class LocAgent:
         prob = 1.0 / len(self.loc_with_orientation)
         # P - macierz z prawdopodobienstwami dla kazdego pola
         self.P = prob * np.ones([len(self.locations)], dtype=np.float)
-        # print(self.P, np.shape(self.P))
         self.P = np.array([[self.P],
                           [self.P],
                           [self.P],
                           [self.P]])
-        self.test_P = None
         self.P = np.transpose(self.P, (0, 2, 1))
-        # self.O_prev = np.zeros([len(self.locations), 4, 4], dtype=np.float)
         self.next_action = 'fwd'
         self.nawrotka = False
 
@@ -93,13 +90,13 @@ class LocAgent:
             # [N, E, S, W]
             # [E, S, W, N]
             i = [3, 0, 1, 2]
-            self.P = self.P[i ,:, :]
+            self.P = self.P[i, :, :]
 
         if self.prev_action == 'turnleft':
             # [N, E, S, W]
             # [W, N, E, S]
             i = [1, 2, 3, 0]
-            self.P = self.P[i ,:, :]
+            self.P = self.P[i, :, :]
 
         # JEZELI W PERCEPT JEST BUMP TO MACIERZ TRANZYCJI TO SAME ZERA Z JEDNA JEDYNKA
 
@@ -119,6 +116,7 @@ class LocAgent:
             # dla kazdego kierunku swiata
             for dir_index, dir in enumerate(['N', 'E', 'S', 'W']):
                 prob = 1.0
+
                 nh_loc = nextLoc((loc[0], loc[1]), world_dir[dir_index])
                 obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
                 if obstale == ('fwd' in percept):
@@ -187,7 +185,16 @@ class LocAgent:
             self.prev_action = action
             return action
 
-        if 'fwd' in percept:
+        # if 'fwd' in percept:
+        #     action = np.random.choice(['turnleft', 'turnright'], 1, p=[0.5, 0.5])
+        #     if self.prev_action == 'turnleft':
+        #         action = 'turnleft'
+        #     if self.prev_action == 'turnright':
+        #         action = 'turnright'
+        #     self.prev_action = action
+        #     return action
+
+        if 'bump' in percept:
             action = np.random.choice(['turnleft', 'turnright'], 1, p=[0.5, 0.5])
             if self.prev_action == 'turnleft':
                 action = 'turnleft'
