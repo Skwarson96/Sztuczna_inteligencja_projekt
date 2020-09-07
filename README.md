@@ -23,7 +23,11 @@ Heurystyka działa na kilku zasadach:
 1 - gdy robot wykryje, że jest w ślepej uliczce ( percept == ['fwd', 'right', 'left'] ) wykona zwrot, który składa
 się z dwóch obrotów w lewo a następnie zrobi krok do przodu. Dzięki temu sprawnie wychodzi ze ślepych zaułków.
 
-2 - gdy robot wykryje przeszkodę przed sobą wykona zwrot w lewo lub prawo z prawdopodobieństwem 50% dla każdej z opcji.
+~~2 - gdy robot wykryje przeszkodę przed sobą wykona zwrot w lewo lub prawo z prawdopodobieństwem 50% dla każdej z opcji.
+Jednak robot nie wykona obrotu w lewo jeżeli poprzednią akcją był obrót w prawo i analogicznie nie obróci się w prawo jeżelii
+wcześniej obrócił się w lewo. Dzięki temu robot nie wykonuje bezsensownych obrotów przed przeszkodą, tylko zawróci.
+
+2 - gdy robot wykryje 'bump' wykona zwrot w lewo lub prawo z prawdopodobieństwem 50% dla każdej z opcji.
 Jednak robot nie wykona obrotu w lewo jeżeli poprzednią akcją był obrót w prawo i analogicznie nie obróci się w prawo jeżelii
 wcześniej obrócił się w lewo. Dzięki temu robot nie wykonuje bezsensownych obrotów przed przeszkodą, tylko zawróci.
 
