@@ -54,6 +54,7 @@ class LocAgent:
         self.P = np.transpose(self.P, (0, 2, 1))
         self.next_action = 'fwd'
         self.nawrotka = False
+        self.prev_percept = []
 
 
 
@@ -85,29 +86,33 @@ class LocAgent:
                 for index, loc in enumerate(self.locations):
                         T[dir_index, index, index] = 1.0
 
+        # jezeli zostanie wykryte 'bump', oznacza to ze robot stoi przed sciania i sie nie poruszyl
+        # to znaczy jest w tym samym miejscu. Macierz jednostkowa
+        if 'bump' in percept:
+            for dir_index, direction in enumerate(['N', 'E', 'S', 'W']):
+                for index, loc in enumerate(self.locations):
+                        T[dir_index, index, index] = 1.0
+
         # zmiana kolejnosci w macierzy self.P w zaleznosci w ktora strone nastapil obrot
-        if self.prev_action == 'turnright':
-            # [N, E, S, W]
-            # [E, S, W, N]
+        # jezeli robot sie nie obrocil to nie zmienia sie wartosc percept
+        # (obrona przed prawdopodobnym brakiem obrotu robota)
+        # psuje to gdy w poprawnym dzialaniu percept sie nie zmienia
+        if self.prev_action == 'turnright' and self.prev_percept != percept:
             i = [3, 0, 1, 2]
             self.P = self.P[i, :, :]
-
-        if self.prev_action == 'turnleft':
-            # [N, E, S, W]
-            # [W, N, E, S]
+        else:
+            pass
+        if self.prev_action == 'turnleft' and self.prev_percept != percept:
             i = [1, 2, 3, 0]
             self.P = self.P[i, :, :]
-
-        # JEZELI W PERCEPT JEST BUMP TO MACIERZ TRANZYCJI TO SAME ZERA Z JEDNA JEDYNKA
-
+        else:
+            pass
 
         # jezeli poprzednia akcja jest rowna None (poczatek!)
         if self.prev_action == None:
             for dir_index, direction in enumerate(['N', 'E', 'S', 'W']):
                 for index, loc in enumerate(self.locations):
                     T[dir_index, index, index, ] = 1.0
-
-
 
         # MACIERZ SENSORA
         O = np.zeros([4, 1, len(self.locations)], dtype=np.float)
@@ -155,7 +160,6 @@ class LocAgent:
         else:
             self.O_prev = O
 
-
         T = np.transpose(T, (0, 2, 1))
         self.P = T @ self.P
 
@@ -186,15 +190,6 @@ class LocAgent:
             self.prev_action = action
             return action
 
-        # if 'fwd' in percept:
-        #     action = np.random.choice(['turnleft', 'turnright'], 1, p=[0.5, 0.5])
-        #     if self.prev_action == 'turnleft':
-        #         action = 'turnleft'
-        #     if self.prev_action == 'turnright':
-        #         action = 'turnright'
-        #     self.prev_action = action
-        #     return action
-
         if 'bump' in percept:
             action = np.random.choice(['turnleft', 'turnright'], 1, p=[0.5, 0.5])
             if self.prev_action == 'turnleft':
@@ -215,7 +210,7 @@ class LocAgent:
             return action
 
 # -----------------------------------------
-
+        self.prev_percept = percept
         self.prev_action = action
         return action
 
