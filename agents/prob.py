@@ -108,6 +108,7 @@ class LocAgent:
                     T[dir_index, index, index, ] = 1.0
 
 
+
         # MACIERZ SENSORA
         O = np.zeros([4, 1, len(self.locations)], dtype=np.float)
         world_dir = ['N', 'E', 'S', 'W']
