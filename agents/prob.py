@@ -55,12 +55,11 @@ class LocAgent:
         self.next_action = 'fwd'
         self.nawrotka = False
         self.prev_percept = []
-
+        self.P_prev = None
 
 
     def __call__(self, percept):
         # TODO PUT YOUR CODE HERE
-
         # MACIERZ TRANZYCJI
         T = np.zeros([4, len(self.locations), len(self.locations)], dtype=np.float)
 
@@ -93,26 +92,35 @@ class LocAgent:
                 for index, loc in enumerate(self.locations):
                         T[dir_index, index, index] = 1.0
 
-        # zmiana kolejnosci w macierzy self.P w zaleznosci w ktora strone nastapil obrot
-        # jezeli robot sie nie obrocil to nie zmienia sie wartosc percept
-        # (obrona przed prawdopodobnym brakiem obrotu robota)
-        # psuje to gdy w poprawnym dzialaniu percept sie nie zmienia
-        if self.prev_action == 'turnright' and self.prev_percept != percept:
-            i = [3, 0, 1, 2]
-            self.P = self.P[i, :, :]
-        else:
-            pass
-        if self.prev_action == 'turnleft' and self.prev_percept != percept:
-            i = [1, 2, 3, 0]
-            self.P = self.P[i, :, :]
-        else:
-            pass
 
         # jezeli poprzednia akcja jest rowna None (poczatek!)
         if self.prev_action == None:
             for dir_index, direction in enumerate(['N', 'E', 'S', 'W']):
                 for index, loc in enumerate(self.locations):
                     T[dir_index, index, index, ] = 1.0
+
+
+        # zmiana kolejnosci w macierzy self.P w zaleznosci w ktora strone nastapil obrot
+        if self.prev_action == 'turnright' and self.prev_percept != percept:
+            i = [3, 0, 1, 2]
+            self.P = self.P[i, :, :]
+        if self.prev_action == 'turnleft' and self.prev_percept != percept:
+            i = [1, 2, 3, 0]
+            self.P = self.P[i, :, :]
+
+        # usuniecie 'bump' z prev_percept
+        if 'bump' in self.prev_percept:
+            self.prev_percept.remove('bump')
+        # gdy robot sie nie obroci to nie powinna sie zmienic wartosc percept
+        if self.prev_action == 'turnright' and self.prev_percept == percept:
+            self.P = self.P_prev
+            action = 'turnright'
+            return action
+        if self.prev_action == 'turnleft' and self.prev_percept == percept:
+            self.P = self.P_prev
+            action = 'turnleft'
+            return action
+
 
         # MACIERZ SENSORA
         O = np.zeros([4, 1, len(self.locations)], dtype=np.float)
@@ -168,6 +176,9 @@ class LocAgent:
 
         self.P /= np.sum(self.P)
 
+        self.P_prev = self.P
+        self.prev_percept = percept
+
 # ------------------------------------------
         # HEURISTICS
         action = 'forward'
@@ -210,7 +221,6 @@ class LocAgent:
             return action
 
 # -----------------------------------------
-        self.prev_percept = percept
         self.prev_action = action
         return action
 
