@@ -25,7 +25,7 @@ się z dwóch obrotów w lewo a następnie zrobi krok do przodu. Dzięki temu sp
 
 ~~2 - gdy robot wykryje przeszkodę przed sobą wykona zwrot w lewo lub prawo z prawdopodobieństwem 50% dla każdej z opcji.
 Jednak robot nie wykona obrotu w lewo jeżeli poprzednią akcją był obrót w prawo i analogicznie nie obróci się w prawo jeżelii
-wcześniej obrócił się w lewo. Dzięki temu robot nie wykonuje bezsensownych obrotów przed przeszkodą, tylko zawróci.
+wcześniej obrócił się w lewo. Dzięki temu robot nie wykonuje bezsensownych obrotów przed przeszkodą, tylko zawróci.~~
 
 2 - gdy robot wykryje 'bump' wykona zwrot w lewo lub prawo z prawdopodobieństwem 50% dla każdej z opcji.
 Jednak robot nie wykona obrotu w lewo jeżeli poprzednią akcją był obrót w prawo i analogicznie nie obróci się w prawo jeżelii
