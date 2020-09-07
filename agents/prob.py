@@ -38,6 +38,7 @@ class LocAgent:
 
         # dictionary from location to its index in the list
         self.loc_to_idx = {loc: idx for idx, loc in enumerate(self.locations)}
+        print(self.loc_to_idx)
         # self.loc_with_orientation_to_idx = {loc: idx for idx, loc in enumerate(self.loc_with_orientation)}
 
         self.eps_perc = eps_perc
@@ -69,13 +70,13 @@ class LocAgent:
         # macierz tranzcji
         T = np.zeros([4, len(self.locations), len(self.locations)], dtype=np.float)
         # print("  macierz T   ", type(T), np.shape(T))
-        print(self.loc_to_idx)
+        # print(self.loc_to_idx)
         # jezeli poprzednia akcja byl krok PROSTO
         if self.prev_action == 'forward':
             for dir_index, direction in enumerate(['N', 'E', 'S', 'W']):
                 for index, loc in enumerate(self.locations):
                     next_loc = nextLoc((loc[0], loc[1]), direction)
-                    print(loc, direction, next_loc)
+                    # print(loc, direction, next_loc)
                     if legalLoc((next_loc[0], next_loc[1]), self.size) and ((next_loc[0], next_loc[1]) not in self.walls):
                         next_index = self.loc_to_idx[next_loc]
                         # prawdopodobienstwo ze sie ruszy z miejsca
@@ -92,13 +93,33 @@ class LocAgent:
                     # prawdopodobienstwo ze sie obroci
                     # jezeli robot sie obrocil to zmienia sie wartosci w percept
                     if self.prev_percept != percept:
-                        # T[index,index, index2] = 1.0 - self.eps_move
-                        T[dir_index, index, index] = 1.0
-                        # prawdopodobienstwo ze sie nie obroci
-                    else:
-                        # T[index,index, index2] = self.eps_move
+                        # T[dir_index, index, index]  = 1.0 - self.eps_move
                         T[dir_index, index, index] = 1.0
 
+                        # prawdopodobienstwo ze sie nie obroci
+                    else:
+                        # T[dir_index, index, index]  = self.eps_move
+                        T[dir_index, index, index] = 1.0
+
+            if self.prev_action == 'turnright':
+                # [N, E, S, W]
+                # [E, S, W, N]
+                # self.P
+                i = [3, 0, 1, 2]
+
+                self.P = self.P[i ,:, :]
+                # pass
+            if self.prev_action == 'turnleft':
+                # [N, E, S, W]
+                # [W, N, E, S]
+                # zmiana w self.P w 0 wymiarze
+                i = [1, 2, 3, 0]
+                self.P = self.P[i ,:, :]
+                # pass
+
+
+
+            # T = np.ones([4, len(self.locations), len(self.locations)], dtype=np.float)
         # JEZELI W PERCEPT JEST BUMP TO MACIERZ TRANZYCJI TO SAME ZERA Z JEDNA JEDYNKA
 
 
@@ -236,46 +257,10 @@ class LocAgent:
 
 
 
-                prob = round(prob, 5)
+                # prob = round(prob, 5)
                 O[dir_index, 0, index] = prob
-                # print(loc, dir, prob, percept)
+                print(loc, dir, prob, percept)
 
-
-            # for dir_index, dir in enumerate(world_dir):
-            #     prob = 1.0
-            #     for dir_index2, dir2 in enumerate(['N', 'E', 'S', 'W']):
-            #         # sprawdz czy rozwazana lokalizacja w tym kierunku jest przeszkoda
-            #         nh_loc = nextLoc((loc[0], loc[1]), dir2)
-            #         obstale = (not legalLoc(nh_loc, self.size)) or (nh_loc in self.walls)
-            #         if dir2 == 'N':
-            #             # print("N", dir2, obstale , 'fwd' in percept)
-            #             print(dir2, 'fwd')
-            #             if obstale == ('fwd' in percept):
-            #                 prob *= (1 - self.eps_perc)
-            #             else:
-            #                 prob *= self.eps_perc
-            #         if dir2 == "E":
-            #             print(dir2, 'right')
-            #             if obstale == ('right' in percept):
-            #                 prob *= (1 - self.eps_perc)
-            #             else:
-            #                 prob *= self.eps_perc
-            #         if dir2 == "S":
-            #             print(dir2, 'bckwd')
-            #             if obstale == ('bckwd' in percept):
-            #                 prob *= (1 - self.eps_perc)
-            #             else:
-            #                 prob *= self.eps_perc
-            #         if dir2 == "W":
-            #             print(dir2, 'left')
-            #             if obstale == ('left' in percept):
-            #                 prob *= (1 - self.eps_perc)
-            #             else:
-            #                 prob *= self.eps_perc
-            #
-            #         prob = round(prob, 5)
-            #         O[dir_index, 0, index] = prob
-            #         print(loc, dir, prob, percept)
 #----------------------------------------------------------------------------------------
         # print(O)
 
@@ -291,7 +276,7 @@ class LocAgent:
 
         # print("T", np.shape(T),"self.P", np.shape(self.P))
         # print(T)
-        # T = np.transpose(T, (2, 0, 1))
+        T = np.transpose(T, (0, 2, 1))
         # comparison = self.T_prev == T
         # equal_arrays = comparison.all()
         # print(equal_arrays)
@@ -302,6 +287,15 @@ class LocAgent:
         # print("O", np.shape(O),"self.P", np.shape(self.P))
         O = np.transpose(O, (0, 2, 1))
         # print("O", np.shape(O),"self.P", np.shape(self.P))
+
+        for i in range(4):
+            for idx in range(42):
+                print(idx, O[i,idx, 0], "*", self.P[i, idx, 0], '=',O[i,idx, 0]*self.P[i, idx, 0])
+
+        print(np.max(O*self.P))
+
+
+
         self.P = O * self.P
 
         # print(self.P)
@@ -313,6 +307,17 @@ class LocAgent:
         # print(self.P)
         # print(np.shape(self.P))
 
+
+        # for x in range(np.shape(T)[0]):
+        #     print(x, "----------------------------------------------------")
+        #     for y in range(np.shape(T)[1]):
+        #         for z in range(np.shape(T)[2]):
+        #             print(T[x,z,y], end=' ')
+        #
+        #         print('\n')
+        #     # break
+        #     print('\n')
+        # print(np.shape(T))
         # ------------------------------------------
         action = 'forward'
 
