@@ -44,7 +44,7 @@ class LocAgent:
         self.prev_action = None
 
         self.t = 0
-        prob = 1.0 / len(self.loc_with_orientation)
+        prob = 1.0 / len(self.loc_with_orientation) / 4
         # P - macierz z prawdopodobienstwami dla kazdego pola
         self.P = prob * np.ones([len(self.locations)], dtype=np.float)
         self.P = np.array([[self.P],
@@ -108,6 +108,7 @@ class LocAgent:
             i = [1, 2, 3, 0]
             self.P = self.P[i, :, :]
 
+
         # usuniecie 'bump' z prev_percept
         if 'bump' in self.prev_percept:
             self.prev_percept.remove('bump')
@@ -159,7 +160,6 @@ class LocAgent:
                 else:
                     prob *= self.eps_perc
 
-                prob = round(prob, 5)
                 O[dir_index, 0, index] = prob
 
         # Gdy czujnik nic nie wykryje
@@ -182,47 +182,57 @@ class LocAgent:
 # ------------------------------------------
         # HEURISTICS
         action = 'forward'
-        if percept == ['fwd', 'right', 'left']:
-            # print('nawrotka 1')
-            self.nawrotka = True
-            action = 'turnleft'
-            self.prev_action = action
-            return action
 
-        if self.nawrotka == True:
-            # print('nawrotka 2')
-            self.nawrotka = False
-            action = 'turnleft'
-            self.prev_action = action
-            return action
-
-        if percept == [ 'right', 'bckwd', 'left']:
-            action = 'forward'
-            self.prev_action = action
-            return action
-
-        if 'bump' in percept:
-            action = np.random.choice(['turnleft', 'turnright'], 1, p=[0.5, 0.5])
-            if self.prev_action == 'turnleft':
+        if np.max(self.P) > 0.8:
+        # losowe poruszanie sie
+            if 'fwd' in percept:
+                # skret w prawo lub w lewo z prawdopodobienstwe 50%
+                action = np.random.choice(['turnleft', 'turnright'], 1, p=[0.5, 0.5])
+            else:
+                # Ruch do przodu z malym prawdopodobienstwem skretu
+                action = np.random.choice(['forward', 'turnleft', 'turnright'], 1, p=[0.8, 0.1, 0.1])
+        else:
+            if percept == ['fwd', 'right', 'left']:
+                self.nawrotka = True
                 action = 'turnleft'
-            if self.prev_action == 'turnright':
-                action = 'turnright'
-            self.prev_action = action
-            return action
+                self.prev_action = action
+                return action
 
-        if percept == [ 'right']  or percept == ['fwd', 'right'] :
-            action = np.random.choice(['turnleft', 'forward'], 1, p=[0.5, 0.5])
-            self.prev_action = action
-            return action
+            if self.nawrotka == True:
+                self.nawrotka = False
+                action = 'turnleft'
+                self.prev_action = action
+                return action
 
-        if percept == ['left'] or percept == ['fwd', 'left']:
-            action = np.random.choice(['turnright', 'forward'], 1, p=[0.5, 0.5])
-            self.prev_action = action
-            return action
+            if percept == [ 'right', 'bckwd', 'left']:
+                action = 'forward'
+                self.prev_action = action
+                return action
 
-# -----------------------------------------
+            if 'bump' in percept:
+                action = np.random.choice(['turnleft', 'turnright'], 1, p=[0.5, 0.5])
+                if self.prev_action == 'turnleft':
+                    action = 'turnleft'
+                if self.prev_action == 'turnright':
+                    action = 'turnright'
+                self.prev_action = action
+                return action
+
+            if percept == [ 'right']  or percept == ['fwd', 'right'] :
+                action = np.random.choice(['turnleft', 'forward'], 1, p=[0.5, 0.5])
+                self.prev_action = action
+                return action
+
+            if percept == ['left'] or percept == ['fwd', 'left']:
+                action = np.random.choice(['turnright', 'forward'], 1, p=[0.5, 0.5])
+                self.prev_action = action
+                return action
+
         self.prev_action = action
         return action
+
+# -----------------------------------------
+
 
     def getPosterior(self):
         # directions in order 'N', 'E', 'S', 'W'
