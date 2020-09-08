@@ -191,7 +191,29 @@ class LocAgent:
             else:
                 # Ruch do przodu z malym prawdopodobienstwem skretu
                 action = np.random.choice(['forward', 'turnleft', 'turnright'], 1, p=[0.8, 0.1, 0.1])
+        # robot stara sie trzymac przy scianie
         else:
+            if percept == ['fwd']:
+                action = 'turnright'
+                self.prev_action = action
+                return action
+            if percept == [ 'right']:
+                action = 'forward'
+                self.prev_action = action
+                return action
+            if percept == ['left']:
+                action = 'forward'
+                self.prev_action = action
+                return action
+            if percept == ['fwd', 'left']:
+                action = 'turnright'
+                self.prev_action = action
+                return action
+            if percept == ['fwd', 'right']:
+                action = 'turnleft'
+                self.prev_action = action
+                return action
+
             if percept == ['fwd', 'right', 'left']:
                 self.nawrotka = True
                 action = 'turnleft'
@@ -204,12 +226,12 @@ class LocAgent:
                 self.prev_action = action
                 return action
 
-            if percept == [ 'right', 'bckwd', 'left']:
+            if percept == ['right', 'bckwd', 'left']:
                 action = 'forward'
                 self.prev_action = action
                 return action
 
-            if 'bump' in percept:
+            if ('bump' in percept) and (self.prev_action == 'forward'):
                 action = np.random.choice(['turnleft', 'turnright'], 1, p=[0.5, 0.5])
                 if self.prev_action == 'turnleft':
                     action = 'turnleft'
@@ -218,13 +240,13 @@ class LocAgent:
                 self.prev_action = action
                 return action
 
-            if percept == [ 'right']  or percept == ['fwd', 'right'] :
-                action = np.random.choice(['turnleft', 'forward'], 1, p=[0.5, 0.5])
+            if ('bump' in percept) and ('left' in percept):
+                action = 'turnright'
                 self.prev_action = action
                 return action
 
-            if percept == ['left'] or percept == ['fwd', 'left']:
-                action = np.random.choice(['turnright', 'forward'], 1, p=[0.5, 0.5])
+            if ('bump' in percept) and ('right' in percept):
+                action = 'turnleft'
                 self.prev_action = action
                 return action
 
