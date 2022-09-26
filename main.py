@@ -113,27 +113,23 @@ class LocView:
         self.agt = None
         self.arrow = None
         ccenter = 1.167 * (xySize - .5)
-        # self.time = Text(Point(ccenter, (xySize - 1) * .75), "Time").draw(win)
-        # self.time.setSize(36)
-        # self.setTimeColor("black")
 
-        self.agentName = Text(Point(ccenter, (xySize - 1) * .5), "").draw(win)
-        self.agentName.setSize(20)
-        self.agentName.setFill("Orange")
+        self.time = Text(Point(ccenter, (xySize - 1) * .75), "Time").draw(win)
+        self.time.setSize(36)
+        self.setTimeColor("black")
 
-        self.info = Text(Point(ccenter, (xySize - 1) * .25), "").draw(win)
+        self.info = Text(Point(ccenter, (xySize - 1) * .5), "info").draw(win)
         self.info.setSize(20)
         self.info.setFace("courier")
 
         self.update(state)
 
-    def setAgent(self, name):
-        self.agentName.setText(name)
+    def setTime(self, seconds):
+        text = f"Step: {str(seconds)}"
+        self.time.setText(text)
 
-    # def setTime(self, seconds):
-    #     self.time.setText(str(seconds))
-
-    def setInfo(self, info):
+    def setInfo(self, percept_info, action_info):
+        info = f"Percept:\n" + "\n".join("-"+item for item in percept_info) + f" \n Action: \n {action_info}"
         self.info.setText(info)
 
     def update(self, state, P=None):
@@ -167,8 +163,8 @@ class LocView:
     def pause(self):
         self.win.getMouse()
 
-    # def setTimeColor(self, c):
-    #     self.time.setTextColor(c)
+    def setTimeColor(self, c):
+        self.time.setTextColor(c)
 
     def close(self):
         self.win.close()
@@ -183,25 +179,25 @@ def main():
     # chance that the agent will not move forward despite the command
     eps_move = 0.05
     # number of actions to execute
-    n_steps = 40
+    n_steps = 50
     # size of the environment
     env_size = 16
     # map of the environment: 1 - wall, 0 - free
     map = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+                    [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0],
+                    [1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1],
+                    [1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0],
+                    [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+                    [1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1],
+                    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+                    [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
                     [1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1],
                     [1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0],
                     [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
                     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
     # build the list of walls locations
     walls = []
@@ -218,9 +214,11 @@ def main():
     agent = agents.prob.LocAgent(env.size, env.walls, eps_perc, eps_move)
     for t in range(n_steps):
         print('step %d' % t)
+        view.setTime(t)
 
         percept = env.getPercept()
         action = agent(percept)
+        view.setInfo(percept, action)
         # get what the agent thinks of the environment
         P = agent.getPosterior()
 
@@ -230,7 +228,7 @@ def main():
         view.update(env, P)
         update(rate)
         # uncomment to pause before action
-        view.pause()
+        # view.pause()
 
         env.doAction(action)
 
