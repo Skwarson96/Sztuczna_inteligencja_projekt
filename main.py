@@ -181,24 +181,12 @@ def main():
     # number of actions to execute
     n_steps = 50
     # size of the environment
-    env_size = 16
+    env_size = 3
     # map of the environment: 1 - wall, 0 - free
-    map = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0],
-                    [1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1],
-                    [1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0],
-                    [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-                    [1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1],
-                    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
-                    [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-                    [1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1],
-                    [1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0],
-                    [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-                    [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
+    map = np.array([[0, 0, 0],
+                    [0, 0, 0],
+                    [0, 0, 0]])
+
     # build the list of walls locations
     walls = []
     for i in range(map.shape[0]):
@@ -220,15 +208,15 @@ def main():
         action = agent(percept)
         view.setInfo(percept, action)
         # get what the agent thinks of the environment
-        P = agent.getPosterior()
+        prob = agent.getPosterior()
 
         print('Percept: ', percept)
         print('Action ', action)
 
-        view.update(env, P)
+        view.update(env, prob)
         update(rate)
         # uncomment to pause before action
-        # view.pause()
+        view.pause()
 
         env.doAction(action)
 
