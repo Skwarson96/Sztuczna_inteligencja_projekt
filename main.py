@@ -182,11 +182,16 @@ def main():
     n_steps = 50
     # size of the environment
     env_size = 3
+    # env_size = 5
     # map of the environment: 1 - wall, 0 - free
-    map = np.array([[0, 0, 0],
-                    [0, 0, 0],
+    map = np.array([[0, 0, 1],
+                    [0, 1, 0],
                     [0, 0, 0]])
-
+    # map = np.array([[0, 0, 1, 0, 1],
+    #                 [0, 1, 0, 0, 0],
+    #                 [0, 0, 0, 0, 1],
+    #                 [1, 0, 1, 0, 0],
+    #                 [0, 0, 1, 1, 0]])
     # build the list of walls locations
     walls = []
     for i in range(map.shape[0]):
