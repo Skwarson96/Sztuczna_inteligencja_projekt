@@ -30,6 +30,7 @@ class LocAgent:
         self.walls = walls
 
         dir_to_idx = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
+        self.directions = ['N', 'E', 'S', 'W']
         self.locations = list({*locations(self.size)}.difference(self.walls))
         print(self.locations)
 
@@ -42,6 +43,7 @@ class LocAgent:
         # dictionary from location to its index in the list
         self.loc_to_idx = {loc: idx for idx, loc in enumerate(self.locations)}
         print(self.loc_to_idx)
+
         self.eps_perc = eps_perc
         self.eps_move = eps_move
 
@@ -51,7 +53,7 @@ class LocAgent:
         prob = 1.0 / (len(self.locations) * 4)
         # P - macierz z prawdopodobienstwami dla kazdego pola
         self.P = prob * np.ones((4, self.size, self.size), dtype=np.float)
-        print(self.P)
+        print("self.P", self.P)
         print('shape self.P', self.P.shape)
 
         self.P_prev = None
@@ -59,71 +61,66 @@ class LocAgent:
 
     def __call__(self, percept):
         # MACIERZ TRANZYCJI
-        transition_matrix = np.zeros([4, self.size, self.size], dtype=np.float)
+        transition_matrix = np.ones([4, self.size, self.size], dtype=np.float)
 
-        if self.prev_action == 'forward':
-            transition_matrix = np.ones([4, self.size, self.size], dtype=np.float) * (1.0 - self.eps_move)
-        elif self.prev_action == 'turnright' or self.prev_action == 'turnleft':
+        if self.prev_action == "turnright" or self.prev_action == "turnleft":
             transition_matrix = np.ones([4, self.size, self.size], dtype=np.float)
-        else:
+        if self.prev_action == "forward" and "bump" in percept:
             transition_matrix = np.ones([4, self.size, self.size], dtype=np.float)
-
-        # print('transition_matrix', transition_matrix)
+        if self.prev_action == "forward":
+            transition_matrix = np.ones([4, self.size, self.size], dtype=np.float) * (1 -self.eps_move)
 
 
         sensor_matrix = np.zeros([4, self.size, self.size], dtype=np.float)
-        print('percept', percept)
-        directions = ['N', 'E', 'S', 'W']
-        for dir_idx, direction in enumerate(directions):
-            probability = 1.0
+        for dir_idx, direction in enumerate(self.directions):
+
+            print("direction", direction)
             for loc_idx, location in enumerate(self.locations):
+                probability = 1.0
 
-                fwd_location = nextLoc(location, directions[dir_idx])
-                right_location = nextLoc(location, directions[dir_idx-3])
-                bckwd_location = nextLoc(location, directions[dir_idx-2])
-                left_location = nextLoc(location, directions[dir_idx-1])
+                fwd_location = nextLoc(location, self.directions[dir_idx])
+                right_location = nextLoc(location, self.directions[dir_idx-3])
+                bckwd_location = nextLoc(location, self.directions[dir_idx-2])
+                left_location = nextLoc(location, self.directions[dir_idx-1])
 
-                if 'forward' in percept:
-                    if legalLoc(fwd_location, self.size) or fwd_location in self.walls:
+
+                if 'fwd' in percept:
+                    if not legalLoc(fwd_location, self.size) or fwd_location in self.walls:
                         probability *= 1.0 - self.eps_perc
                     else:
                         probability *= self.eps_perc
 
                 if 'right' in percept:
-                    if legalLoc(right_location, self.size) or right_location in self.walls:
+                    if not legalLoc(right_location, self.size) or right_location in self.walls:
                         probability *= 1.0 - self.eps_perc
                     else:
                         probability *= self.eps_perc
 
                 if 'bckwd' in percept:
-                    if legalLoc(bckwd_location, self.size) or bckwd_location in self.walls:
+                    if not legalLoc(bckwd_location, self.size) or bckwd_location in self.walls:
                         probability *= 1.0 - self.eps_perc
                     else:
                         probability *= self.eps_perc
 
                 if 'left' in percept:
-                    if legalLoc(left_location, self.size) or left_location in self.walls:
+                    if not legalLoc(left_location, self.size) or left_location in self.walls:
                         probability *= 1.0 - self.eps_perc
                     else:
                         probability *= self.eps_perc
 
-
-
-                print(direction, location, probability)
                 probability = round(probability, 5)
+
                 sensor_matrix[dir_idx, location[0], location[1]] = probability
 
-
-
+        print('1 sensor_matrix', sensor_matrix)
 
         # locations -> (kolumna, wiersz), (0, 0) -> lewy dolny rog
-        print('sensor_matrix.shape', sensor_matrix.shape)
-        print('transition_matrix.shape', transition_matrix.shape)
-        self.P = transition_matrix * sensor_matrix
-        if 'bump' in percept:
-            self.P = np.array([np.eye(self.size), np.eye(self.size), np.eye(self.size), np.eye(self.size)])
-        #
-        # print(self.P.shape)
+        print("sensor_matrix.shape", sensor_matrix.shape)
+
+
+        # self.P = transition_matrix * sensor_matrix
+        self.P =  sensor_matrix
+
 
         action = self.heuristic(percept)
 
@@ -149,11 +146,12 @@ class LocAgent:
 
     def getPosterior(self):
         # directions in order 'N', 'E', 'S', 'W'
-        p_arr = np.zeros([4, self.size, self.size], dtype=np.float)
+        # p_arr = np.zeros([4, self.size, self.size], dtype=np.float)
+        print("self.P.shape", self.P.shape)
         p_arr = self.P
 
-
         p_arr = np.transpose(p_arr, (1, 2, 0))
+        print("p_arr", p_arr)
         # -----------------------
         return p_arr
 
