@@ -68,7 +68,17 @@ class LocAgent:
         if self.prev_action == "forward" and "bump" in percept:
             transition_matrix = np.ones([4, self.size, self.size], dtype=np.float)
         if self.prev_action == "forward":
-            transition_matrix = np.ones([4, self.size, self.size], dtype=np.float) * (1 -self.eps_move)
+            transition_matrix = np.zeros([4, self.size, self.size], dtype=np.float) * (1 -self.eps_move)
+            for dir_idx, direction in enumerate(self.directions):
+                print("direction", direction)
+                for loc_idx, location in enumerate(self.locations):
+                    if self.P_prev[dir_idx, location[0], location[1]] != 0:
+                        fwd_location = nextLoc(location, self.directions[dir_idx])
+                        if legalLoc(fwd_location, self.size):
+                            if transition_matrix[dir_idx, fwd_location[0], fwd_location[1]] != self.eps_move:
+                                transition_matrix[dir_idx, location[0], location[1]] = self.eps_move
+                                transition_matrix[dir_idx, fwd_location[0], fwd_location[1]] = 1 - self.eps_move
+
 
 
         sensor_matrix = np.zeros([4, self.size, self.size], dtype=np.float)
@@ -108,20 +118,25 @@ class LocAgent:
                     else:
                         probability *= self.eps_perc
 
+                if len(percept) == 0:
+                    # probability *= 1.0 ???
+                    pass
+
+
                 probability = round(probability, 5)
 
                 sensor_matrix[dir_idx, location[0], location[1]] = probability
 
-        print('1 sensor_matrix', sensor_matrix)
-
-        # locations -> (kolumna, wiersz), (0, 0) -> lewy dolny rog
+        print('1 transition_matrix', transition_matrix)
+        # self.P = transition_matrix * sensor_matrix
+        print("self.P.shape", self.P.shape)
         print("sensor_matrix.shape", sensor_matrix.shape)
 
+        self.P = sensor_matrix * (self.P @ transition_matrix)
+        self.P /= np.sum(self.P)
 
-        # self.P = transition_matrix * sensor_matrix
-        self.P =  sensor_matrix
-
-
+        print("self.P", self.P)
+        self.P_prev = self.P
         action = self.heuristic(percept)
 
         return action
@@ -146,12 +161,8 @@ class LocAgent:
 
     def getPosterior(self):
         # directions in order 'N', 'E', 'S', 'W'
-        # p_arr = np.zeros([4, self.size, self.size], dtype=np.float)
-        print("self.P.shape", self.P.shape)
-        p_arr = self.P
-
-        p_arr = np.transpose(p_arr, (1, 2, 0))
-        print("p_arr", p_arr)
+        p_arr = np.transpose(self.P, (1, 2, 0))
+        # print("p_arr", p_arr)
         # -----------------------
         return p_arr
 
