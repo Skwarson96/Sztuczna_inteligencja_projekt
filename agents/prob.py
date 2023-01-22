@@ -29,16 +29,8 @@ class LocAgent:
         self.size = size
         self.walls = walls
 
-        dir_to_idx = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
         self.directions = ['N', 'E', 'S', 'W']
         self.locations = list({*locations(self.size)}.difference(self.walls))
-        print(self.locations)
-
-        self.loc_with_orientation = []
-        for i in self.locations:
-            for idx2 in dir_to_idx.values():
-                new = (i[0], i[1], idx2)
-                self.loc_with_orientation.append(new)
 
         # dictionary from location to its index in the list
         self.loc_to_idx = {loc: idx for idx, loc in enumerate(self.locations)}
@@ -56,9 +48,6 @@ class LocAgent:
         print("self.P", self.P)
         print('shape self.P', self.P.shape)
 
-        self.P_prev = None
-
-
     def __call__(self, percept):
         # MACIERZ TRANZYCJI
         transition_matrix = np.ones([4, self.size, self.size], dtype=np.float)
@@ -67,24 +56,17 @@ class LocAgent:
             transition_matrix = np.ones([4, self.size, self.size], dtype=np.float)
         if self.prev_action == "forward" and "bump" in percept:
             transition_matrix = np.ones([4, self.size, self.size], dtype=np.float)
-        if self.prev_action == "forward":
-            transition_matrix = np.zeros([4, self.size, self.size], dtype=np.float) * (1 -self.eps_move)
+        if self.prev_action == "forward" and "bump" not in percept:
+            transition_matrix = np.ones([4, self.size, self.size], dtype=np.float)
             for dir_idx, direction in enumerate(self.directions):
-                print("direction", direction)
                 for loc_idx, location in enumerate(self.locations):
-                    if self.P_prev[dir_idx, location[0], location[1]] != 0:
-                        fwd_location = nextLoc(location, self.directions[dir_idx])
-                        if legalLoc(fwd_location, self.size):
-                            if transition_matrix[dir_idx, fwd_location[0], fwd_location[1]] != self.eps_move:
-                                transition_matrix[dir_idx, location[0], location[1]] = self.eps_move
-                                transition_matrix[dir_idx, fwd_location[0], fwd_location[1]] = 1 - self.eps_move
-
-
+                    fwd_location = nextLoc(location, self.directions[dir_idx])
+                    if legalLoc(fwd_location, self.size) and fwd_location not in self.walls:
+                        transition_matrix[dir_idx, location[0], location[1]] = self.eps_move
+                        transition_matrix[dir_idx, fwd_location[0], fwd_location[1]] = 1 - self.eps_move
 
         sensor_matrix = np.zeros([4, self.size, self.size], dtype=np.float)
         for dir_idx, direction in enumerate(self.directions):
-
-            print("direction", direction)
             for loc_idx, location in enumerate(self.locations):
                 probability = 1.0
 
@@ -99,9 +81,19 @@ class LocAgent:
                         probability *= 1.0 - self.eps_perc
                     else:
                         probability *= self.eps_perc
+                if 'fwd' not in percept:
+                    if legalLoc(fwd_location, self.size) and fwd_location not in self.walls:
+                        probability *= 1.0 - self.eps_perc
+                    else:
+                        probability *= self.eps_perc
 
                 if 'right' in percept:
                     if not legalLoc(right_location, self.size) or right_location in self.walls:
+                        probability *= 1.0 - self.eps_perc
+                    else:
+                        probability *= self.eps_perc
+                if 'right' not in percept:
+                    if legalLoc(right_location, self.size) and right_location not in self.walls:
                         probability *= 1.0 - self.eps_perc
                     else:
                         probability *= self.eps_perc
@@ -111,32 +103,44 @@ class LocAgent:
                         probability *= 1.0 - self.eps_perc
                     else:
                         probability *= self.eps_perc
+                if 'bckwd' not in percept:
+                    if legalLoc(bckwd_location, self.size) and bckwd_location not in self.walls:
+                        probability *= 1.0 - self.eps_perc
+                    else:
+                        probability *= self.eps_perc
 
                 if 'left' in percept:
                     if not legalLoc(left_location, self.size) or left_location in self.walls:
                         probability *= 1.0 - self.eps_perc
                     else:
                         probability *= self.eps_perc
-
-                if len(percept) == 0:
-                    # probability *= 1.0 ???
-                    pass
+                if 'left' not in percept:
+                    if legalLoc(left_location, self.size) and left_location not in self.walls:
+                        probability *= 1.0 - self.eps_perc
+                    else:
+                        probability *= self.eps_perc
 
 
                 probability = round(probability, 5)
 
                 sensor_matrix[dir_idx, location[0], location[1]] = probability
 
-        print('1 transition_matrix', transition_matrix)
-        # self.P = transition_matrix * sensor_matrix
-        print("self.P.shape", self.P.shape)
+
         print("sensor_matrix.shape", sensor_matrix.shape)
+        print("sensor_matrix", sensor_matrix)
+        print("transition_matrix.shape", transition_matrix.shape)
+        print("transition_matrix", transition_matrix)
 
-        self.P = sensor_matrix * (self.P @ transition_matrix)
+        self.P = transition_matrix  * sensor_matrix * self.P
+
+        print("self.P 2 ", self.P)
+
+
         self.P /= np.sum(self.P)
+        print("self.P 3 ", self.P)
+        print("np.sum(self.P):", np.sum(self.P))
 
-        print("self.P", self.P)
-        self.P_prev = self.P
+
         action = self.heuristic(percept)
 
         return action
@@ -162,7 +166,6 @@ class LocAgent:
     def getPosterior(self):
         # directions in order 'N', 'E', 'S', 'W'
         p_arr = np.transpose(self.P, (1, 2, 0))
-        # print("p_arr", p_arr)
         # -----------------------
         return p_arr
 
