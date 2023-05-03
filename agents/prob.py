@@ -36,10 +36,23 @@ class LocAgent:
         self.prev_action = None
 
         # P - macierz z prawdopodobienstwami dla kazdego pola
-        self.P = (1.0 / (len(self.locations) * 4)) * np.ones((4, self.size, self.size), dtype=np.float)
+        self.P = (1.0 / (len(self.locations) * 4)) * np.ones(
+            (4, self.size, self.size), dtype=np.float
+        )
 
     def __call__(self, percept):
-        # MACIERZ TRANZYCJI
+        transition_matrix = self.get_transition_matrix()
+        sensor_matrix = self.get_sensor_matrix(percept)
+
+        self.P = transition_matrix * sensor_matrix
+
+        self.P /= np.sum(self.P)
+
+        action = self.heuristic(percept)
+
+        return action
+
+    def get_transition_matrix(self):
         transition_matrix = np.ones([4, self.size, self.size], dtype=np.float)
 
         if self.prev_action == "turnright":
@@ -84,8 +97,9 @@ class LocAgent:
                         ] * (
                             1 - self.eps_move
                         )
+        return transition_matrix
 
-        # MACIERZ SENSORA
+    def get_sensor_matrix(self, percept):
         sensor_matrix = np.zeros([4, self.size, self.size], dtype=np.float)
         for dir_idx, direction in enumerate(self.directions):
             for loc_idx, location in enumerate(self.locations):
@@ -96,87 +110,35 @@ class LocAgent:
                 bckwd_location = nextLoc(location, self.directions[dir_idx - 2])
                 left_location = nextLoc(location, self.directions[dir_idx - 1])
 
-                if "fwd" in percept:
-                    if (
-                        not legalLoc(fwd_location, self.size)
-                        or fwd_location in self.walls
-                    ):
-                        probability *= 1.0 - self.eps_perc
-                    else:
-                        probability *= self.eps_perc
-                if "fwd" not in percept:
-                    if (
-                        legalLoc(fwd_location, self.size)
-                        and fwd_location not in self.walls
-                    ):
-                        probability *= 1.0 - self.eps_perc
-                    else:
-                        probability *= self.eps_perc
+                probability = (
+                    probability
+                    * self.get_sensor_probability("fwd", percept, fwd_location)
+                    * self.get_sensor_probability("right", percept, right_location)
+                    * self.get_sensor_probability("bckwd", percept, bckwd_location)
+                    * self.get_sensor_probability("left", percept, left_location)
+                )
 
-                if "right" in percept:
-                    if (
-                        not legalLoc(right_location, self.size)
-                        or right_location in self.walls
-                    ):
-                        probability *= 1.0 - self.eps_perc
-                    else:
-                        probability *= self.eps_perc
-                if "right" not in percept:
-                    if (
-                        legalLoc(right_location, self.size)
-                        and right_location not in self.walls
-                    ):
-                        probability *= 1.0 - self.eps_perc
-                    else:
-                        probability *= self.eps_perc
+                sensor_matrix[dir_idx, location[0], location[1]] = round(probability, 5)
 
-                if "bckwd" in percept:
-                    if (
-                        not legalLoc(bckwd_location, self.size)
-                        or bckwd_location in self.walls
-                    ):
-                        probability *= 1.0 - self.eps_perc
-                    else:
-                        probability *= self.eps_perc
-                if "bckwd" not in percept:
-                    if (
-                        legalLoc(bckwd_location, self.size)
-                        and bckwd_location not in self.walls
-                    ):
-                        probability *= 1.0 - self.eps_perc
-                    else:
-                        probability *= self.eps_perc
+        return sensor_matrix
 
-                if "left" in percept:
-                    if (
-                        not legalLoc(left_location, self.size)
-                        or left_location in self.walls
-                    ):
-                        probability *= 1.0 - self.eps_perc
-                    else:
-                        probability *= self.eps_perc
-                if "left" not in percept:
-                    if (
-                        legalLoc(left_location, self.size)
-                        and left_location not in self.walls
-                    ):
-                        probability *= 1.0 - self.eps_perc
-                    else:
-                        probability *= self.eps_perc
+    def get_sensor_probability(self, site, percept, next_location):
+        if site in percept:
+            if not legalLoc(next_location, self.size) or next_location in self.walls:
+                probability = 1.0 - self.eps_perc
+            else:
+                probability = self.eps_perc
 
-                probability = round(probability, 5)
+            return probability
 
-                sensor_matrix[dir_idx, location[0], location[1]] = probability
+        if site not in percept:
+            if legalLoc(next_location, self.size) and next_location not in self.walls:
+                probability = 1.0 - self.eps_perc
+            else:
+                probability = self.eps_perc
 
-        self.P = transition_matrix * sensor_matrix
+            return probability
 
-        self.P /= np.sum(self.P)
-
-        action = self.heuristic(percept)
-
-        return action
-
-    # ------------------------------------------
     def heuristic(self, percept):
         action = "forward"
         # losowe poruszanie sie
