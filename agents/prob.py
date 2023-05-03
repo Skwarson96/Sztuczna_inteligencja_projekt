@@ -1,6 +1,3 @@
-# prob.py
-# This is
-
 import random
 import numpy as np
 import sys
@@ -45,26 +42,34 @@ class LocAgent:
         prob = 1.0 / (len(self.locations) * 4)
         # P - macierz z prawdopodobienstwami dla kazdego pola
         self.P = prob * np.ones((4, self.size, self.size), dtype=np.float)
-        print("self.P", self.P)
-        print('shape self.P', self.P.shape)
 
     def __call__(self, percept):
         # MACIERZ TRANZYCJI
         transition_matrix = np.ones([4, self.size, self.size], dtype=np.float)
 
-        if self.prev_action == "turnright" or self.prev_action == "turnleft":
-            transition_matrix = np.ones([4, self.size, self.size], dtype=np.float)
-        if self.prev_action == "forward" and "bump" in percept:
-            transition_matrix = np.ones([4, self.size, self.size], dtype=np.float)
-        if self.prev_action == "forward" and "bump" not in percept:
-            transition_matrix = np.ones([4, self.size, self.size], dtype=np.float)
+        if self.prev_action == "turnright":
+            transition_matrix = np.zeros([4, self.size, self.size], dtype=np.float)
+            for dir_idx, direction in enumerate(self.directions):
+                for loc_idx, location in enumerate(self.locations):
+                    transition_matrix[dir_idx, location[0], location[1]] = self.P[dir_idx, location[0], location[1]]* self.eps_move + self.P[dir_idx-1, location[0], location[1]]*(1 -self.eps_move)
+
+        elif self.prev_action == "turnleft":
+            transition_matrix = np.zeros([4, self.size, self.size], dtype=np.float)
+            for dir_idx, direction in enumerate(self.directions):
+                for loc_idx, location in enumerate(self.locations):
+                    transition_matrix[dir_idx, location[0], location[1]] = self.P[dir_idx, location[0], location[
+                        1]] * self.eps_move + self.P[dir_idx - 3, location[0], location[1]] * (1 - self.eps_move)
+
+        elif self.prev_action == "forward":# and "bump" not in percept:
+            transition_matrix = np.zeros([4, self.size, self.size], dtype=np.float)
             for dir_idx, direction in enumerate(self.directions):
                 for loc_idx, location in enumerate(self.locations):
                     fwd_location = nextLoc(location, self.directions[dir_idx])
                     if legalLoc(fwd_location, self.size) and fwd_location not in self.walls:
-                        transition_matrix[dir_idx, location[0], location[1]] = self.eps_move
-                        transition_matrix[dir_idx, fwd_location[0], fwd_location[1]] = 1 - self.eps_move
+                        transition_matrix[dir_idx, fwd_location[0], fwd_location[1]] = self.P[dir_idx, location[0], location[
+                            1]] * self.eps_move + self.P[dir_idx, fwd_location[0], fwd_location[1]] * (1 - self.eps_move)
 
+        # MACIERZ SENSORA
         sensor_matrix = np.zeros([4, self.size, self.size], dtype=np.float)
         for dir_idx, direction in enumerate(self.directions):
             for loc_idx, location in enumerate(self.locations):
@@ -126,19 +131,12 @@ class LocAgent:
                 sensor_matrix[dir_idx, location[0], location[1]] = probability
 
 
-        print("sensor_matrix.shape", sensor_matrix.shape)
-        print("sensor_matrix", sensor_matrix)
-        print("transition_matrix.shape", transition_matrix.shape)
-        print("transition_matrix", transition_matrix)
 
-        self.P = transition_matrix  * sensor_matrix * self.P
+        self.P = transition_matrix * sensor_matrix
 
-        print("self.P 2 ", self.P)
 
 
         self.P /= np.sum(self.P)
-        print("self.P 3 ", self.P)
-        print("np.sum(self.P):", np.sum(self.P))
 
 
         action = self.heuristic(percept)
