@@ -41,7 +41,7 @@ class LocAgent:
         )
 
     def __call__(self, percept):
-        transition_matrix = self.get_transition_matrix()
+        transition_matrix = self.get_transition_matrix(percept)
         sensor_matrix = self.get_sensor_matrix(percept)
 
         self.P = transition_matrix * sensor_matrix
@@ -52,7 +52,7 @@ class LocAgent:
 
         return action
 
-    def get_transition_matrix(self):
+    def get_transition_matrix(self, percept):
         transition_matrix = np.ones([4, self.size, self.size], dtype=np.float)
 
         if self.prev_action == "turnright":
@@ -79,7 +79,7 @@ class LocAgent:
                         1 - self.eps_move
                     )
 
-        elif self.prev_action == "forward":  # and "bump" not in percept:
+        elif self.prev_action == "forward":
             transition_matrix = np.zeros([4, self.size, self.size], dtype=np.float)
             for dir_idx, direction in enumerate(self.directions):
                 for loc_idx, location in enumerate(self.locations):
@@ -97,6 +97,10 @@ class LocAgent:
                         ] * (
                             1 - self.eps_move
                         )
+
+        elif "bump" in percept:
+            transition_matrix = np.ones([4, self.size, self.size], dtype=np.float)
+
         return transition_matrix
 
     def get_sensor_matrix(self, percept):
@@ -144,7 +148,7 @@ class LocAgent:
         # losowe poruszanie sie
         if "fwd" in percept:
             # skret w prawo lub w lewo z prawdopodobienstwe 50%
-            action = np.random.choice(["turnleft", "turnright"], 1, p=[0.5, 0.5])
+            action = np.random.choice(["forward", "turnleft", "turnright"], 1, p=[0.2, 0.4, 0.4])
         else:
             # Ruch do przodu z malym prawdopodobienstwem skretu
             action = np.random.choice(
