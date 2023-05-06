@@ -1,6 +1,7 @@
 import random
 import numpy as np
 import sys
+import networkx as nx
 
 np.set_printoptions(threshold=sys.maxsize)
 
@@ -34,7 +35,9 @@ class LocAgent:
         self.eps_move = eps_move
 
         self.prev_action = None
-
+        self.visited_locations = {}
+        self.target_location = None
+        self.path = []
         # P - macierz z prawdopodobienstwami dla kazdego pola
         self.P = (1.0 / (len(self.locations) * 4)) * np.ones(
             (4, self.size, self.size), dtype=np.float
@@ -144,27 +147,198 @@ class LocAgent:
             return probability
 
     def heuristic(self, percept):
-        action = "forward"
-        # losowe poruszanie sie
-        if "fwd" in percept:
-            # skret w prawo lub w lewo z prawdopodobienstwe 50%
-            action = np.random.choice(["forward", "turnleft", "turnright"], 1, p=[0.2, 0.4, 0.4])
-        else:
-            # Ruch do przodu z malym prawdopodobienstwem skretu
-            action = np.random.choice(
-                ["forward", "turnleft", "turnright"], 1, p=[0.8, 0.1, 0.1]
+        action = ["forward"]
+
+        max_value, max_value_pos = np.max(self.P), np.argmax(self.P)
+        max_value_pos_3d = np.unravel_index(max_value_pos, self.P.shape)
+        current_location = max_value_pos_3d[1:]
+        current_direction = self.directions[max_value_pos_3d[0]]
+
+        print("max_value:", max_value)
+        print("current_direction:", current_direction, "location:", current_location)
+        print("self.target_location", self.target_location)
+
+        if max_value > 0.8:
+            self.visited_locations[current_location] = max_value
+
+            if self.target_location is None:
+                self.target_location = self.calculate_fahrest_point(current_location)
+                print("self.target_location", self.target_location)
+
+            self.calculate_path(current_location)
+            print(self.path)
+
+            next_location = self.path[0]
+            action = self.calculate_next_action(
+                current_location, current_direction, next_location
             )
+
+        else:
+            # losowe poruszanie sie
+            if "fwd" in percept:
+                # skret w prawo lub w lewo z prawdopodobienstwe 50%
+                action = np.random.choice(
+                    ["forward", "turnleft", "turnright"], 1, p=[0.2, 0.4, 0.4]
+                )
+            else:
+                # Ruch do przodu z malym prawdopodobienstwem skretu
+                action = np.random.choice(
+                    ["forward", "turnleft", "turnright"], 1, p=[0.8, 0.1, 0.1]
+                )
 
         self.prev_action = action
 
         return action
 
-    # -----------------------------------------
+    def calculate_fahrest_point(self, max_value_location):
+        farthest_location = random.choice(self.locations)
+        max_manhattan_distance = 0
+
+        for location in self.locations:
+            manhattan_distance = np.sum(
+                np.abs(np.array(location) - np.array(max_value_location))
+            )
+            if manhattan_distance > max_manhattan_distance:
+                max_manhattan_distance = manhattan_distance
+                farthest_location = location
+
+        return farthest_location
+
+    def calculate_path(self, current_location):
+        graph = nx.DiGraph()
+
+        for location in self.locations:
+            graph.add_node(location)
+
+        for location1 in self.locations:
+            for location2 in self.locations:
+                if (
+                    (
+                        location1[0] + 1 == location2[0]
+                        or location1[0] - 1 == location2[0]
+                    )
+                    and location1[1] == location2[1]
+                ) or (
+                    (
+                        location1[1] + 1 == location2[1]
+                        or location1[1] - 1 == location2[1]
+                    )
+                    and location1[0] == location2[0]
+                ):
+                    graph.add_edge(location1, location2, weight=1)
+
+        self.path = nx.astar_path(graph, current_location, self.target_location)[1:]
+
+    def calculate_next_action(self, current_location, current_direction, next_location):
+        action = None
+        if current_direction == "N":
+            # next_location u góry
+            if (
+                current_location[0] == next_location[0]
+                and current_location[1] < next_location[1]
+            ):
+                action = ["forward"]
+            # next_location po prawej
+            if (
+                current_location[0] < next_location[0]
+                and current_location[1] == next_location[1]
+            ):
+                action = ["turnright"]
+            # next_location z tylu
+            if (
+                current_location[0] == next_location[0]
+                and current_location[1] > next_location[1]
+            ):
+                action = ["turnright"]
+            # next_location po lewej
+            if (
+                current_location[0] > next_location[0]
+                and current_location[1] == next_location[1]
+            ):
+                action = ["turnleft"]
+
+        if current_direction == "E":
+            # next_location u góry
+            if (
+                current_location[0] == next_location[0]
+                and current_location[1] < next_location[1]
+            ):
+                action = ["turnleft"]
+            # next_location po prawej
+            if (
+                current_location[0] < next_location[0]
+                and current_location[1] == next_location[1]
+            ):
+                action = ["forward"]
+            # next_location z tylu
+            if (
+                current_location[0] == next_location[0]
+                and current_location[1] > next_location[1]
+            ):
+                action = ["turnright"]
+            # next_location po lewej
+            if (
+                current_location[0] > next_location[0]
+                and current_location[1] == next_location[1]
+            ):
+                action = ["turnleft"]
+
+        if current_direction == "S":
+            # next_location u góry
+            if (
+                current_location[0] == next_location[0]
+                and current_location[1] < next_location[1]
+            ):
+                action = ["turnleft"]
+            # next_location po prawej
+            if (
+                current_location[0] < next_location[0]
+                and current_location[1] == next_location[1]
+            ):
+                action = ["turnleft"]
+            # next_location z tylu
+            if (
+                current_location[0] == next_location[0]
+                and current_location[1] > next_location[1]
+            ):
+                action = ["forward"]
+            # next_location po lewej
+            if (
+                current_location[0] > next_location[0]
+                and current_location[1] == next_location[1]
+            ):
+                action = ["turnright"]
+
+        if current_direction == "W":
+            # next_location u góry
+            if (
+                current_location[0] == next_location[0]
+                and current_location[1] < next_location[1]
+            ):
+                action = ["turnright"]
+            # next_location po prawej
+            if (
+                current_location[0] < next_location[0]
+                and current_location[1] == next_location[1]
+            ):
+                action = ["turnleft"]
+            # next_location z tylu
+            if (
+                current_location[0] == next_location[0]
+                and current_location[1] > next_location[1]
+            ):
+                action = ["turnleft"]
+            # next_location po lewej
+            if (
+                current_location[0] > next_location[0]
+                and current_location[1] == next_location[1]
+            ):
+                action = ["forward"]
+
+        return action
 
     def getPosterior(self):
-        # directions in order 'N', 'E', 'S', 'W'
         p_arr = np.transpose(self.P, (1, 2, 0))
-        # -----------------------
         return p_arr
 
     def forward(self, cur_loc, cur_dir):
