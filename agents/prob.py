@@ -56,8 +56,6 @@ class LocAgent:
         return action
 
     def get_transition_matrix(self, percept):
-        transition_matrix = np.ones([4, self.size, self.size], dtype=np.float)
-
         if self.prev_action == "turnright":
             transition_matrix = np.zeros([4, self.size, self.size], dtype=np.float)
             for dir_idx, direction in enumerate(self.directions):
@@ -82,27 +80,37 @@ class LocAgent:
                         1 - self.eps_move
                     )
 
-        elif self.prev_action == "forward":
+        else:
             transition_matrix = np.zeros([4, self.size, self.size], dtype=np.float)
+
             for dir_idx, direction in enumerate(self.directions):
                 for loc_idx, location in enumerate(self.locations):
                     fwd_location = nextLoc(location, self.directions[dir_idx])
-                    if (
-                        legalLoc(fwd_location, self.size)
-                        and fwd_location not in self.walls
-                    ):
-                        transition_matrix[
-                            dir_idx, fwd_location[0], fwd_location[1]
-                        ] = self.P[
-                            dir_idx, location[0], location[1]
-                        ] * self.eps_move + self.P[
-                            dir_idx, fwd_location[0], fwd_location[1]
-                        ] * (
-                            1 - self.eps_move
+                    if fwd_location not in self.locations:
+                        transition_matrix[dir_idx, location[0], location[1]] = (
+                            1.0 * self.P[dir_idx, location[0], location[1]]
                         )
 
-        elif "bump" in percept:
-            transition_matrix = np.ones([4, self.size, self.size], dtype=np.float)
+            for dir_idx, direction in enumerate(self.directions):
+                for loc_idx, location in enumerate(self.locations):
+                    fwd_location = nextLoc(location, self.directions[dir_idx])
+                    if fwd_location in self.locations:
+                        transition_matrix[
+                            dir_idx, location[0], location[1]
+                        ] = transition_matrix[dir_idx, location[0], location[1]] + (
+                            self.eps_move * self.P[dir_idx, location[0], location[1]]
+                        )
+                        transition_matrix[
+                            dir_idx, fwd_location[0], fwd_location[1]
+                        ] = transition_matrix[
+                            dir_idx, fwd_location[0], fwd_location[1]
+                        ] + (
+                            (1 - self.eps_move)
+                            * self.P[dir_idx, location[0], location[1]]
+                        )
+
+        # if "bump" in percept:
+        #     transition_matrix = np.ones([4, self.size, self.size], dtype=np.float)
 
         return transition_matrix
 
@@ -125,12 +133,18 @@ class LocAgent:
                     * self.get_sensor_probability("left", percept, left_location)
                 )
 
-                sensor_matrix[dir_idx, location[0], location[1]] = round(probability, 5)
+                sensor_matrix[
+                    dir_idx, location[0], location[1]
+                ] = probability
 
         return sensor_matrix
 
     def get_sensor_probability(self, site, percept, next_location):
         if site in percept:
+            if site == "fwd" and "bump" in percept:
+                probability = 1.0
+                return probability
+
             if not legalLoc(next_location, self.size) or next_location in self.walls:
                 probability = 1.0 - self.eps_perc
             else:
@@ -147,44 +161,40 @@ class LocAgent:
             return probability
 
     def heuristic(self, percept):
-        action = ["forward"]
-
         max_value, max_value_pos = np.max(self.P), np.argmax(self.P)
         max_value_pos_3d = np.unravel_index(max_value_pos, self.P.shape)
         current_location = max_value_pos_3d[1:]
         current_direction = self.directions[max_value_pos_3d[0]]
 
-        print("max_value:", max_value)
-        print("current_direction:", current_direction, "location:", current_location)
-        print("self.target_location", self.target_location)
+        # print("max_value:", max_value)
+        # print("current_direction:", current_direction, "location:", current_location)
+        # print("self.target_location", self.target_location)
 
-        if max_value > 0.8:
-            self.visited_locations[current_location] = max_value
-
-            if self.target_location is None:
-                self.target_location = self.calculate_fahrest_point(current_location)
-                print("self.target_location", self.target_location)
-
-            self.calculate_path(current_location)
-            print(self.path)
-
-            next_location = self.path[0]
-            action = self.calculate_next_action(
-                current_location, current_direction, next_location
+        # if max_value > 0.8:
+        #     # self.visited_locations[current_location] = max_value
+        #
+        #     # if self.target_location is None:
+        #     #     self.target_location = self.calculate_fahrest_point(current_location)
+        #     #     print("self.target_location", self.target_location)
+        #     #
+        #     # self.calculate_path(current_location)
+        #     # print(self.path)
+        #     #
+        #     # next_location = self.path[0]
+        #     # action = self.calculate_next_action(
+        #     #     current_location, current_direction, next_location
+        #     # )
+        #     pass
+        # else:
+        # # losowe poruszanie sie
+        if "fwd" in percept:
+            action = np.random.choice(
+                ["forward", "turnleft", "turnright"], 1, p=[0.2, 0.4, 0.4]
             )
-
         else:
-            # losowe poruszanie sie
-            if "fwd" in percept:
-                # skret w prawo lub w lewo z prawdopodobienstwe 50%
-                action = np.random.choice(
-                    ["forward", "turnleft", "turnright"], 1, p=[0.2, 0.4, 0.4]
-                )
-            else:
-                # Ruch do przodu z malym prawdopodobienstwem skretu
-                action = np.random.choice(
-                    ["forward", "turnleft", "turnright"], 1, p=[0.8, 0.1, 0.1]
-                )
+            action = np.random.choice(
+                ["forward", "turnleft", "turnright"], 1, p=[0.8, 0.1, 0.1]
+            )
 
         self.prev_action = action
 
