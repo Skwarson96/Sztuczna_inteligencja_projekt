@@ -166,35 +166,38 @@ class LocAgent:
         current_location = max_value_pos_3d[1:]
         current_direction = self.directions[max_value_pos_3d[0]]
 
-        # print("max_value:", max_value)
-        # print("current_direction:", current_direction, "location:", current_location)
-        # print("self.target_location", self.target_location)
+        print("max_value:", max_value)
+        print("current_direction:", current_direction, "location:", current_location)
+        print("self.target_location", self.target_location)
 
-        # if max_value > 0.8:
-        #     # self.visited_locations[current_location] = max_value
-        #
-        #     # if self.target_location is None:
-        #     #     self.target_location = self.calculate_fahrest_point(current_location)
-        #     #     print("self.target_location", self.target_location)
-        #     #
-        #     # self.calculate_path(current_location)
-        #     # print(self.path)
-        #     #
-        #     # next_location = self.path[0]
-        #     # action = self.calculate_next_action(
-        #     #     current_location, current_direction, next_location
-        #     # )
-        #     pass
-        # else:
-        # # losowe poruszanie sie
-        if "fwd" in percept:
-            action = np.random.choice(
-                ["forward", "turnleft", "turnright"], 1, p=[0.2, 0.4, 0.4]
-            )
+        if max_value > 0.8:
+            self.visited_locations[current_location] = max_value
+
+            if self.target_location is None or self.target_location == current_location:
+                self.target_location = self.calculate_fahrest_point(current_location)
+                print("self.target_location", self.target_location)
+
+            self.calculate_path(current_location)
+            print(self.path)
+
+            next_location = self.path[0]
+
+
+
+            action = np.array([self.calculate_next_action(
+                current_location, current_direction, next_location
+            )])
+
         else:
-            action = np.random.choice(
-                ["forward", "turnleft", "turnright"], 1, p=[0.8, 0.1, 0.1]
-            )
+
+            if "fwd" in percept:
+                action = np.random.choice(
+                    ["forward", "turnleft", "turnright"], 1, p=[0.2, 0.4, 0.4]
+                )
+            else:
+                action = np.random.choice(
+                    ["forward", "turnleft", "turnright"], 1, p=[0.8, 0.1, 0.1]
+                )
 
         self.prev_action = action
 
@@ -247,25 +250,25 @@ class LocAgent:
                 current_location[0] == next_location[0]
                 and current_location[1] < next_location[1]
             ):
-                action = ["forward"]
+                action = "forward"
             # next_location po prawej
             if (
                 current_location[0] < next_location[0]
                 and current_location[1] == next_location[1]
             ):
-                action = ["turnright"]
+                action = "turnright"
             # next_location z tylu
             if (
                 current_location[0] == next_location[0]
                 and current_location[1] > next_location[1]
             ):
-                action = ["turnright"]
+                action = "turnright"
             # next_location po lewej
             if (
                 current_location[0] > next_location[0]
                 and current_location[1] == next_location[1]
             ):
-                action = ["turnleft"]
+                action = "turnleft"
 
         if current_direction == "E":
             # next_location u góry
@@ -273,25 +276,25 @@ class LocAgent:
                 current_location[0] == next_location[0]
                 and current_location[1] < next_location[1]
             ):
-                action = ["turnleft"]
+                action = "turnleft"
             # next_location po prawej
             if (
                 current_location[0] < next_location[0]
                 and current_location[1] == next_location[1]
             ):
-                action = ["forward"]
+                action = "forward"
             # next_location z tylu
             if (
                 current_location[0] == next_location[0]
                 and current_location[1] > next_location[1]
             ):
-                action = ["turnright"]
+                action = "turnright"
             # next_location po lewej
             if (
                 current_location[0] > next_location[0]
                 and current_location[1] == next_location[1]
             ):
-                action = ["turnleft"]
+                action = "turnleft"
 
         if current_direction == "S":
             # next_location u góry
@@ -299,25 +302,25 @@ class LocAgent:
                 current_location[0] == next_location[0]
                 and current_location[1] < next_location[1]
             ):
-                action = ["turnleft"]
+                action = "turnleft"
             # next_location po prawej
             if (
                 current_location[0] < next_location[0]
                 and current_location[1] == next_location[1]
             ):
-                action = ["turnleft"]
+                action = "turnleft"
             # next_location z tylu
             if (
                 current_location[0] == next_location[0]
                 and current_location[1] > next_location[1]
             ):
-                action = ["forward"]
+                action = "forward"
             # next_location po lewej
             if (
                 current_location[0] > next_location[0]
                 and current_location[1] == next_location[1]
             ):
-                action = ["turnright"]
+                action = "turnright"
 
         if current_direction == "W":
             # next_location u góry
@@ -325,25 +328,25 @@ class LocAgent:
                 current_location[0] == next_location[0]
                 and current_location[1] < next_location[1]
             ):
-                action = ["turnright"]
+                action = "turnright"
             # next_location po prawej
             if (
                 current_location[0] < next_location[0]
                 and current_location[1] == next_location[1]
             ):
-                action = ["turnleft"]
+                action = "turnleft"
             # next_location z tylu
             if (
                 current_location[0] == next_location[0]
                 and current_location[1] > next_location[1]
             ):
-                action = ["turnleft"]
+                action = "turnleft"
             # next_location po lewej
             if (
                 current_location[0] > next_location[0]
                 and current_location[1] == next_location[1]
             ):
-                action = ["forward"]
+                action = "forward"
 
         return action
 
