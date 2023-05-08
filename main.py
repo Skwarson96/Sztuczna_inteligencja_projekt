@@ -127,6 +127,7 @@ class LocView:
         self.info = Text(Point(ccenter, (xySize - 1) * 0.5), "info").draw(win)
         self.info.setSize(20)
         self.info.setFace("courier")
+        self.target_point = None
 
         self.update(state)
 
@@ -142,9 +143,10 @@ class LocView:
         )
         self.info.setText(info)
 
-    def update(self, state, P=None):
+    def update(self, state, path=[], P=None):
         # View state in exiting window
         for loc, cell in self.cells.items():
+            # print(loc, cell)
             if loc in state.walls:
                 cell.setFill("black")
             else:
@@ -159,6 +161,17 @@ class LocView:
             self.agt.undraw()
         if state.agentLoc:
             self.agt = self.drawArrow(state.agentLoc, state.agentDir, 5, self.color)
+        print('len(path)', len(path), 'state.agentLoc', state.agentLoc, 'self.target_point', self.target_point)
+        if len(path) > 0:
+
+            if self.target_point is None or state.agentLoc == self.target_point:
+                self.target_point = path[-1]
+            self.cells[self.target_point].setFill("yellow")
+
+            self.draw_path(path)
+        # else:
+        #     if self.target_point is not None:
+        #         self.cells[self.target_point].setFill("white")
 
     def drawArrow(self, loc, heading, width, color):
         x, y = loc
@@ -172,6 +185,9 @@ class LocView:
         a.draw(self.win)
         return a
 
+    def draw_path(self, path):
+        print('draw_path', path)
+
     def pause(self):
         self.win.getMouse()
 
@@ -183,7 +199,7 @@ class LocView:
 
 
 def main():
-    random.seed(13)
+    random.seed(16)
     # rate of executing actions
     rate = 1
     # chance that perception will be wrong
@@ -193,17 +209,41 @@ def main():
     # eps_move = 0.2
     # number of actions to execute
     n_steps = 50
-
     # map of the environment: 1 - wall, 0 - free
-    map = np.array(
-        [
-            [0, 0, 1, 0, 1],
-            [0, 1, 0, 0, 0],
-            [0, 0, 0, 0, 1],
-            [1, 0, 1, 0, 0],
-            [0, 0, 1, 1, 0],
-        ]
-    )
+    # map = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    #                 [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+    #                 [1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0],
+    #                 [1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0],
+    #                 [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
+                #(0, 0)(X, Y)
+
+    map = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
 
     # size of the environment
     env_size = map.shape[0]
@@ -226,7 +266,9 @@ def main():
         view.setTime(t)
 
         percept = env.getPercept()
-        action = agent(percept)
+
+        action, path = agent(percept)
+
         view.setInfo(percept, action)
         # get what the agent thinks of the environment
         prob = agent.getPosterior()
@@ -234,10 +276,10 @@ def main():
         print("Percept: ", percept)
         print("Action ", action)
 
-        view.update(env, prob)
+        view.update(state=env, path=path, P=prob)
         update(rate)
         # uncomment to pause before action
-        view.pause()
+        # view.pause()
 
         env.doAction(action)
 

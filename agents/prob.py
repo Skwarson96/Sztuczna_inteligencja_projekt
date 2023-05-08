@@ -37,7 +37,7 @@ class LocAgent:
         self.prev_action = None
         self.visited_locations = {}
         self.target_location = None
-        self.path = []
+
         # P - macierz z prawdopodobienstwami dla kazdego pola
         self.P = (1.0 / (len(self.locations) * 4)) * np.ones(
             (4, self.size, self.size), dtype=np.float
@@ -51,9 +51,9 @@ class LocAgent:
 
         self.P /= np.sum(self.P)
 
-        action = self.heuristic(percept)
+        action, path = self.heuristic(percept)
 
-        return action
+        return action, path
 
     def get_transition_matrix(self, percept):
         if self.prev_action == "turnright":
@@ -170,6 +170,8 @@ class LocAgent:
         print("current_direction:", current_direction, "location:", current_location)
         print("self.target_location", self.target_location)
 
+        path = []
+
         if max_value > 0.8:
             self.visited_locations[current_location] = max_value
 
@@ -177,12 +179,10 @@ class LocAgent:
                 self.target_location = self.calculate_fahrest_point(current_location)
                 print("self.target_location", self.target_location)
 
-            self.calculate_path(current_location)
-            print(self.path)
+            path = self.calculate_path(current_location)
+            print(path)
 
-            next_location = self.path[0]
-
-
+            next_location = path[0]
 
             action = np.array([self.calculate_next_action(
                 current_location, current_direction, next_location
@@ -201,7 +201,7 @@ class LocAgent:
 
         self.prev_action = action
 
-        return action
+        return action, path
 
     def calculate_fahrest_point(self, max_value_location):
         farthest_location = random.choice(self.locations)
@@ -240,7 +240,9 @@ class LocAgent:
                 ):
                     graph.add_edge(location1, location2, weight=1)
 
-        self.path = nx.astar_path(graph, current_location, self.target_location)[1:]
+        path = nx.astar_path(graph, current_location, self.target_location)[1:]
+
+        return path
 
     def calculate_next_action(self, current_location, current_direction, next_location):
         action = None
