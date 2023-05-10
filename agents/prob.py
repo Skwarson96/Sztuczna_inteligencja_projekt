@@ -184,6 +184,8 @@ class LocAgent:
 
             next_location = path[0]
 
+            path.insert(0, current_location)
+
             action = np.array([self.calculate_next_action(
                 current_location, current_direction, next_location
             )])

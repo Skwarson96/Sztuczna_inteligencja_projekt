@@ -129,6 +129,9 @@ class LocView:
         self.info.setFace("courier")
         self.target_point = None
 
+        self.neighbours = {(0, -1):'N' , (-1, 0):'E' , (0, 1):'S', (1, 0):'W'}
+        self.path_visualization = []
+
         self.update(state)
 
     def setTime(self, seconds):
@@ -159,19 +162,20 @@ class LocView:
                         )
         if self.agt:
             self.agt.undraw()
+            if len(self.path_visualization) > 0:
+                for path_line in self.path_visualization:
+                    path_line.undraw()
+
         if state.agentLoc:
             self.agt = self.drawArrow(state.agentLoc, state.agentDir, 5, self.color)
-        print('len(path)', len(path), 'state.agentLoc', state.agentLoc, 'self.target_point', self.target_point)
+
         if len(path) > 0:
 
             if self.target_point is None or state.agentLoc == self.target_point:
                 self.target_point = path[-1]
-            self.cells[self.target_point].setFill("yellow")
+            self.cells[self.target_point].setFill("green")
 
             self.draw_path(path)
-        # else:
-        #     if self.target_point is not None:
-        #         self.cells[self.target_point].setFill("white")
 
     def drawArrow(self, loc, heading, width, color):
         x, y = loc
@@ -186,7 +190,90 @@ class LocView:
         return a
 
     def draw_path(self, path):
-        print('draw_path', path)
+        for index, point in enumerate(path):
+            x, y = point
+
+            if point != path[len(path)-1] and point != path[0]:
+
+                next_point = path[index+1]
+                prev_point = path[index-1]
+
+                prev_direction = self.neighbours[(prev_point[0] - point[0], prev_point[1] - point[1])]
+                next_direction = self.neighbours[(point[0] - next_point[0], point[1] - next_point[1])]
+
+                p1 = Point(x, y)
+                p2 = Point(x, y)
+                p3 = Point(x, y)
+
+                if next_direction == 'N' and prev_direction == 'N' :
+                    p1 = Point(x, y - 0.4)
+                    p2 = Point(x, y)
+                    p3 = Point(x, y + 0.4)
+
+                if next_direction == 'N' and prev_direction == 'E':
+                    p1 = Point(x - 0.4, y)
+                    p2 = Point(x, y)
+                    p3 = Point(x, y + 0.4)
+
+                if next_direction == 'N' and prev_direction == 'W':
+                    p1 = Point(x + 0.4, y)
+                    p2 = Point(x, y)
+                    p3 = Point(x, y + 0.4)
+
+                if next_direction == 'E' and prev_direction == 'N':
+                    p1 = Point(x, y - 0.4)
+                    p2 = Point(x, y)
+                    p3 = Point(x + 0.4, y)
+
+                if next_direction == 'E' and prev_direction == 'E':
+                    p1 = Point(x - 0.4, y)
+                    p2 = Point(x, y)
+                    p3 = Point(x + 0.4, y)
+
+                if next_direction == 'E' and prev_direction == 'S':
+                    p1 = Point(x, y + 0.4)
+                    p2 = Point(x, y)
+                    p3 = Point(x + 0.4, y)
+
+                if next_direction == 'S' and prev_direction == 'W':
+                    p1 = Point(x + 0.4, y)
+                    p2 = Point(x, y)
+                    p3 = Point(x, y - 0.4)
+
+                if next_direction == 'S' and prev_direction == 'E':
+                    p1 = Point(x - 0.4, y)
+                    p2 = Point(x, y)
+                    p3 = Point(x, y - 0.4)
+
+                if next_direction == 'S' and prev_direction == 'S':
+                    p1 = Point(x, y + 0.4)
+                    p2 = Point(x, y)
+                    p3 = Point(x, y - 0.4)
+
+                if next_direction == 'W' and prev_direction == 'W':
+                    p1 = Point(x + 0.4, y)
+                    p2 = Point(x, y)
+                    p3 = Point(x - 0.4, y)
+
+                if next_direction == 'W' and prev_direction == 'N':
+                    p1 = Point(x, y - 0.4)
+                    p2 = Point(x, y)
+                    p3 = Point(x - 0.4, y)
+
+                if next_direction == 'W' and prev_direction == 'S':
+                    p1 = Point(x, y + 0.4)
+                    p2 = Point(x, y)
+                    p3 = Point(x - 0.4, y)
+
+
+                pth = Polygon(p1, p2, p3, p2, p1)
+                self.path_visualization.append(pth)
+
+                pth.setOutline('green')
+                pth.setWidth(3)
+
+                pth.draw(self.win)
+
 
     def pause(self):
         self.win.getMouse()
@@ -210,40 +297,23 @@ def main():
     # number of actions to execute
     n_steps = 50
     # map of the environment: 1 - wall, 0 - free
-    # map = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    #                 [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0],
-    #                 [1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0],
-    #                 [1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0],
-    #                 [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    #                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
-                #(0, 0)(X, Y)
-
     map = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+                    [1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0],
+                    [1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0],
+                    [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0],
                     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
+                #(0, 0)(X, Y)
 
     # size of the environment
     env_size = map.shape[0]
