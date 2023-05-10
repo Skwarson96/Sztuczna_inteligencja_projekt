@@ -14,6 +14,7 @@ from gridutil import *
 
 import agents
 
+from PIL import Image as NewImage
 
 class LocWorldEnv:
     actions = "turnleft turnright forward".split()
@@ -146,10 +147,9 @@ class LocView:
         )
         self.info.setText(info)
 
-    def update(self, state, path=[], P=None):
+    def update(self, state, path=[], P=None, step=None, save_img=False):
         # View state in exiting window
         for loc, cell in self.cells.items():
-            # print(loc, cell)
             if loc in state.walls:
                 cell.setFill("black")
             else:
@@ -175,6 +175,11 @@ class LocView:
             self.cells[self.target_point].setFill("green")
 
             self.draw_path(path)
+
+        if save_img:
+            self.win.postscript(file="image.eps", colormode='color')
+            img = NewImage.open("image.eps")
+            img.save("images/image_"+str(step)+".jpg")
 
     def drawArrow(self, loc, heading, width, color):
         x, y = loc
@@ -350,8 +355,9 @@ def main():
         print("Percept: ", percept)
         print("Action ", action)
 
-        view.update(state=env, path=path, P=prob)
+        view.update(state=env, path=path, P=prob, step=t, save_img=True)
         update(rate)
+
         # uncomment to pause before action
         # view.pause()
 

@@ -164,10 +164,6 @@ class LocAgent:
         current_location = max_value_pos_3d[1:]
         current_direction = self.directions[max_value_pos_3d[0]]
 
-        print("max_value:", max_value)
-        print("current_direction:", current_direction, "location:", current_location)
-        print("self.target_location", self.target_location)
-
         path = []
 
         if max_value > 0.8:
@@ -175,10 +171,8 @@ class LocAgent:
 
             if self.target_location is None or self.target_location == current_location:
                 self.target_location = self.calculate_fahrest_point(current_location)
-                print("self.target_location", self.target_location)
 
             path = self.calculate_path(current_location)
-            print(path)
 
             next_location = path[0]
 
