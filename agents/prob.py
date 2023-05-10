@@ -133,9 +133,7 @@ class LocAgent:
                     * self.get_sensor_probability("left", percept, left_location)
                 )
 
-                sensor_matrix[
-                    dir_idx, location[0], location[1]
-                ] = probability
+                sensor_matrix[dir_idx, location[0], location[1]] = probability
 
         return sensor_matrix
 
@@ -186,12 +184,15 @@ class LocAgent:
 
             path.insert(0, current_location)
 
-            action = np.array([self.calculate_next_action(
-                current_location, current_direction, next_location
-            )])
+            action = np.array(
+                [
+                    self.calculate_next_action(
+                        current_location, current_direction, next_location
+                    )
+                ]
+            )
 
         else:
-
             if "fwd" in percept:
                 action = np.random.choice(
                     ["forward", "turnleft", "turnright"], 1, p=[0.2, 0.4, 0.4]
