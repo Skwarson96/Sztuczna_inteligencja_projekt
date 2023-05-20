@@ -1,4 +1,4 @@
-# Robot localisation
+# Robot localization
 
 <p align="center">
 <img src="https://github.com/Skwarson96/Sztuczna_inteligencja_projekt/blob/master/img/gif.gif" />
